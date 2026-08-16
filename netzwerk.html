@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ISP-Verbindungen und IP-Zuweisungen im Datacenter-Kundenportal.">
+  <title>Netzwerk &amp; IP-Adressen · COLO MANAGER</title>
+  <script>
+    (()=>{try{const session=JSON.parse(localStorage.getItem('colo_manager_session')||'null');if(!session?.accessToken){localStorage.removeItem('colo_manager_session');location.replace('login.html?next=/netzwerk');return;}if(['platform_admin','datacenter_staff'].includes(session.user?.role)){location.replace('admin.html?section=network');return;}window.coloManagerSession=session;}catch{localStorage.removeItem('colo_manager_session');location.replace('login.html?next=/netzwerk');}})();
+  </script>
+  <script src="/session-manager.js?v=20260809-3"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{ink:'#001966',action:'#0667F9',mist:'#F3F6FB',text:'#000F3D'},fontFamily:{sans:['Inter','ui-sans-serif','system-ui','sans-serif']},boxShadow:{soft:'0 18px 50px rgba(0,25,102,.08)',card:'0 8px 24px rgba(0,25,102,.06)'}}}}</script>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="/branding.js?v=20260811-3" defer></script>
+  <style>.nav-item.active::before{content:"";position:absolute;left:0;top:50%;width:4px;height:28px;border-radius:0 999px 999px 0;background:#0667F9;transform:translateY(-50%)}.copy-value{word-break:break-all}</style>
+</head>
+<body class="min-h-screen bg-mist font-sans text-text antialiased">
+  <div id="overlay" class="fixed inset-0 z-40 hidden bg-ink/50 backdrop-blur-sm lg:hidden"></div>
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 flex w-[286px] -translate-x-full flex-col bg-ink text-white transition-transform lg:translate-x-0">
+    <div class="flex h-24 items-center justify-between border-b border-white/10 px-8">
+      <a href="/dashboard" data-brand-lockup data-brand-logo-height="48" class="flex items-center gap-3"><span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-action shadow-lg shadow-blue-950/30"><span class="flex w-6 flex-col gap-1"><span class="h-1.5 rounded-full bg-white"></span><span class="h-1.5 rounded-full bg-white"></span><span class="h-1.5 rounded-full bg-blue-200"></span></span></span><span class="leading-none"><span class="block text-lg font-black tracking-[-.045em]">COLO<span class="text-blue-300">MANAGER</span></span><span class="mt-1 block text-[9px] font-bold tracking-[.22em] text-blue-200/70">DATACENTER PORTAL</span></span></a>
+      <button id="closeMenu" class="rounded-full p-2 text-blue-200 lg:hidden" aria-label="Navigation schließen"><i data-lucide="x" class="h-5 w-5"></i></button>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-8" aria-label="Hauptnavigation">
+      <p class="px-8 pb-3 text-[11px] font-bold uppercase tracking-[.18em] text-blue-300/70" data-branding-text="portal.navOverviewEyebrow">Übersicht</p>
+      <a href="/dashboard" class="nav-item relative flex items-center gap-4 px-8 py-3.5 text-sm text-blue-100 hover:bg-white/5"><i data-lucide="layout-dashboard" class="h-5 w-5"></i><span data-branding-text="portal.navDashboard">Dashboard</span></a>
+      <a href="/racks?portal=20260810-1" class="nav-item relative flex items-center gap-4 px-8 py-3.5 text-sm text-blue-100 hover:bg-white/5"><i data-lucide="server" class="h-5 w-5"></i><span data-branding-text="portal.navRacks">Racks &amp; Server</span></a>
+      <a href="/netzwerk" class="nav-item active relative flex items-center gap-4 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white"><i data-lucide="network" class="h-5 w-5 text-blue-300"></i><span data-branding-text="portal.navNetwork">Netzwerk</span></a>
+      <p class="px-8 pb-3 pt-9 text-[11px] font-bold uppercase tracking-[.18em] text-blue-300/70" data-branding-text="portal.navServiceEyebrow">Service</p>
+      <a href="/tickets?portal=20260809-3" class="nav-item relative flex items-center justify-between px-8 py-3.5 text-sm text-blue-100 hover:bg-white/5"><span class="flex items-center gap-4"><i data-lucide="messages-square" class="h-5 w-5"></i><span data-branding-text="portal.navTickets">Tickets</span></span><span id="ticketNavBadge" class="rounded-full bg-action px-2.5 py-1 text-[11px] font-bold text-white">0</span></a>
+      <a href="/dashboard#tarife" class="nav-item relative flex items-center gap-4 px-8 py-3.5 text-sm text-blue-100 hover:bg-white/5"><i data-lucide="shopping-bag" class="h-5 w-5"></i><span data-branding-text="portal.navPlans">Tarife &amp; Optionen</span></a>
+      <a href="/dokumente?portal=20260810-2" class="nav-item relative flex items-center gap-4 px-8 py-3.5 text-sm text-blue-100 hover:bg-white/5"><i data-lucide="file-signature" class="h-5 w-5"></i><span data-branding-text="portal.navDocuments">Verträge &amp; Dokumente</span></a>
+      <a href="/konto" class="nav-item relative flex items-center gap-4 px-8 py-3.5 text-sm text-blue-100 hover:bg-white/5"><i data-lucide="user-cog" class="h-5 w-5"></i><span data-branding-text="portal.navAccount">Mein Konto</span></a>
+    </nav>
+    <div class="m-5 rounded-3xl border border-white/10 bg-white/[.07] p-5"><p class="text-xs font-bold uppercase tracking-[.14em] text-blue-300" data-branding-text="portal.supportEyebrow">Direkter Kontakt</p><p class="mt-2 text-sm font-semibold" data-branding-text="portal.supportTitle">24/7 Datacenter Service</p><a href="/tickets?new=1" class="mt-2 inline-flex items-center gap-1 text-sm text-blue-200 hover:text-white"><span data-branding-text="portal.supportLink">Support starten</span><i data-lucide="arrow-right" class="h-3.5 w-3.5"></i></a></div>
+    <button id="logout" class="mx-5 mb-5 flex items-center gap-3 rounded-full px-5 py-3 text-sm font-semibold text-blue-200 hover:bg-white/[.07] hover:text-white"><i data-lucide="log-out" class="h-4 w-4"></i><span data-branding-text="portal.logoutLabel">Sicher abmelden</span></button>
+  </aside>
+
+  <div class="min-h-screen lg:pl-[286px]">
+    <header class="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200/80 bg-white/90 px-5 backdrop-blur-xl sm:px-8 xl:px-12">
+      <div class="flex items-center gap-4"><button id="openMenu" class="rounded-full border border-slate-200 p-2.5 text-ink lg:hidden" aria-label="Navigation öffnen"><i data-lucide="menu" class="h-5 w-5"></i></button><div><p class="text-sm font-bold text-ink">Netzwerk &amp; IP-Adressen</p><p class="text-[10px] text-slate-400">Ihre bereitgestellten Datacenter-Netze</p></div></div>
+      <div class="flex items-center gap-3"><span id="companyName" class="hidden text-xs font-bold text-slate-500 sm:block">Kundenkonto</span><a href="/konto" id="initials" class="grid h-10 w-10 place-items-center rounded-full bg-ink text-xs font-bold text-white" aria-label="Kontoeinstellungen öffnen">CM</a></div>
+    </header>
+
+    <main class="px-5 py-8 sm:px-8 xl:px-12 xl:py-10">
+      <div class="mx-auto max-w-[1400px]">
+        <section class="overflow-hidden rounded-[32px] bg-ink p-7 text-white shadow-soft sm:p-9">
+          <div class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end"><div><p class="text-xs font-bold uppercase tracking-[.18em] text-blue-300">Netzwerkübersicht</p><h1 class="mt-3 text-3xl font-bold tracking-[-.035em] sm:text-4xl">Ihre Adressräume. Klar dokumentiert.</h1><p class="mt-3 max-w-2xl text-sm leading-relaxed text-blue-100">Hier finden Sie die vom Datacenter bereitgestellten ISP-Verbindungen, IP-Adressen, Gateways und DNS-Parameter für Ihre Standorte.</p></div><span class="inline-flex self-start items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-blue-100"><i data-lucide="shield-check" class="h-4 w-4"></i>Schreibgeschützte Kundensicht</span></div>
+        </section>
+
+        <div class="mt-7 grid gap-4 sm:grid-cols-3">
+          <article class="rounded-3xl bg-white p-5 shadow-card"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Aktive Zuweisungen</p><p id="activeCount" class="mt-3 text-3xl font-bold text-ink">–</p></article>
+          <article class="rounded-3xl bg-white p-5 shadow-card"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">IPv4-Netze</p><p id="ipv4Count" class="mt-3 text-3xl font-bold text-action">–</p></article>
+          <article class="rounded-3xl bg-white p-5 shadow-card"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">IPv6-Netze</p><p id="ipv6Count" class="mt-3 text-3xl font-bold text-violet-700">–</p></article>
+        </div>
+
+        <section class="mt-7 rounded-[30px] bg-white p-6 shadow-soft sm:p-8">
+          <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p class="text-xs font-bold uppercase tracking-[.15em] text-action">ISP &amp; Adressierung</p><h2 class="mt-2 text-2xl font-bold tracking-tight text-ink">Bereitgestellte Netzwerkdaten</h2><p class="mt-2 text-xs leading-relaxed text-slate-400">Änderungen werden durch Ihren Datacenter-Techniker gepflegt.</p></div><label class="relative"><span class="sr-only">Netzwerkdaten durchsuchen</span><i data-lucide="search" class="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i><input id="search" class="w-full rounded-full border border-slate-200 py-3 pl-11 pr-4 text-sm outline-none focus:border-action sm:w-72" placeholder="IP, ISP oder Standort …"></label></div>
+          <div id="assignmentList" class="mt-7 grid gap-5 xl:grid-cols-2"><p class="rounded-2xl bg-mist px-5 py-10 text-center text-sm text-slate-400 xl:col-span-2">Netzwerkdaten werden geladen …</p></div>
+        </section>
+
+        <section class="mt-7 flex items-start gap-4 rounded-[26px] border border-blue-100 bg-blue-50 p-5"><span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-action"><i data-lucide="messages-square" class="h-5 w-5"></i></span><div><p class="text-sm font-bold text-ink">Eine Angabe fehlt oder soll geändert werden?</p><p class="mt-1 text-xs leading-relaxed text-slate-500">Erstellen Sie ein Ticket. Unser Technikteam prüft die Übergabeparameter und aktualisiert die Daten zentral.</p><a href="/tickets?new=1" class="mt-3 inline-flex items-center gap-2 text-xs font-bold text-action">Technik-Ticket erstellen <i data-lucide="arrow-right" class="h-4 w-4"></i></a></div></section>
+      </div>
+    </main>
+    <footer class="border-t border-slate-200 bg-white px-5 py-6 text-xs text-slate-400 sm:px-8 xl:px-12"><div class="mx-auto flex max-w-[1400px] flex-wrap justify-between gap-4"><span>© COLO MANAGER</span><span class="flex gap-5"><a href="/status" class="hover:text-action">Statusseite</a><a href="#" class="hover:text-action">Datenschutz</a><a href="#" class="hover:text-action">Impressum</a></span></div></footer>
+  </div>
+  <div id="toast" class="fixed bottom-6 right-6 z-[70] hidden rounded-2xl bg-ink px-5 py-4 text-sm font-semibold text-white shadow-2xl"></div>
+
+  <script>
+    lucide.createIcons();
+    const session=window.coloManagerSession,apiBase='/api/v1';let assignments=[];
+    const escapeHtml=(value='')=>String(value).replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    const usageLabels={wan:'WAN / Uplink',management:'Management',public_services:'Öffentliche Dienste',backup:'Backup',other:'Sonstiges'};
+    const statusLabels={active:'Aktiv',reserved:'Reserviert',retired:'Außer Betrieb'};
+    const initials=value=>String(value||'CM').trim().split(/\s+/).map(part=>part[0]||'').join('').slice(0,2).toUpperCase();
+    function toast(message){const element=document.getElementById('toast');element.textContent=message;element.classList.remove('hidden');setTimeout(()=>element.classList.add('hidden'),2600);}
+    async function api(path){const response=await fetch(apiBase+path,{headers:{Authorization:`Bearer ${session.accessToken}`,Accept:'application/json'}});if(response.status===401){localStorage.removeItem('colo_manager_session');location.replace('login.html?next=/netzwerk');return;}const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload?.error?.message||'Die Netzwerkdaten konnten nicht geladen werden.');return payload.data;}
+    function detail(label,value,mono=false){if(value===null||value===undefined||value==='')return'';return `<div><dt class="text-[9px] font-bold uppercase tracking-wider text-slate-400">${escapeHtml(label)}</dt><dd class="copy-value mt-1 text-xs font-semibold text-ink ${mono?'font-mono':''}">${escapeHtml(value)}</dd></div>`;}
+    function card(item){const statusClass=item.status==='active'?'bg-emerald-50 text-emerald-700':item.status==='reserved'?'bg-amber-50 text-amber-800':'bg-slate-100 text-slate-500';return `<article class="overflow-hidden rounded-[26px] border border-slate-200"><div class="flex items-start justify-between gap-4 p-5"><div class="flex min-w-0 gap-3"><span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-blue-50 text-action"><i data-lucide="router" class="h-5 w-5"></i></span><div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-wider text-action">${escapeHtml(item.ispName)}</p><h3 class="mt-1 truncate text-base font-bold text-ink">${escapeHtml(item.label)}</h3><p class="mt-1 text-[11px] text-slate-400">${escapeHtml(item.location?.name||'Standort')} ${item.location?.code?`· ${escapeHtml(item.location.code)}`:''}</p></div></div><span class="shrink-0 rounded-full px-3 py-1 text-[10px] font-bold ${statusClass}">${escapeHtml(statusLabels[item.status]||item.status)}</span></div><div class="border-y border-slate-100 bg-slate-50/70 px-5 py-4"><div class="flex items-center justify-between gap-3"><div><p class="text-[9px] font-bold uppercase tracking-wider text-slate-400">IP-Adresse / Netz</p><code class="mt-1 block break-all text-base font-bold text-action">${escapeHtml(item.cidr)}</code></div><span class="rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase text-slate-500">${escapeHtml((item.addressFamily||'').toUpperCase())}</span></div></div><dl class="grid gap-4 p-5 sm:grid-cols-2">${detail('Verwendung',usageLabels[item.usage]||item.usage)}${detail('Gateway',item.gateway,true)}${detail('DNS-Server',(item.dnsServers||[]).join(', '),true)}${detail('VLAN-ID',item.vlanId)}${detail('Provider-Referenz',item.serviceReference)}${detail('Reverse DNS',item.reverseDns,true)}</dl>${item.notes?`<div class="border-t border-slate-100 px-5 py-4"><p class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Technischer Hinweis</p><p class="mt-2 whitespace-pre-line text-xs leading-relaxed text-slate-600">${escapeHtml(item.notes)}</p></div>`:''}</article>`;}
+    function render(){const query=document.getElementById('search').value.trim().toLowerCase();const visible=assignments.filter(item=>!query||`${item.label} ${item.ispName} ${item.cidr} ${item.gateway||''} ${item.location?.name||''} ${item.location?.code||''}`.toLowerCase().includes(query));document.getElementById('assignmentList').innerHTML=visible.length?visible.map(card).join(''):'<div class="rounded-3xl bg-mist px-6 py-12 text-center xl:col-span-2"><span class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white text-slate-400"><i data-lucide="network" class="h-5 w-5"></i></span><p class="mt-3 text-sm font-bold text-ink">Keine Netzwerkdaten gefunden</p><p class="mt-1 text-xs text-slate-400">Für Ihr Kundenkonto sind in dieser Ansicht keine Zuweisungen vorhanden.</p></div>';lucide.createIcons();}
+    document.getElementById('search').addEventListener('input',render);
+    document.getElementById('openMenu').addEventListener('click',()=>{document.getElementById('sidebar').classList.remove('-translate-x-full');document.getElementById('overlay').classList.remove('hidden')});
+    [document.getElementById('closeMenu'),document.getElementById('overlay')].forEach(element=>element.addEventListener('click',()=>{document.getElementById('sidebar').classList.add('-translate-x-full');document.getElementById('overlay').classList.add('hidden')}));
+    document.getElementById('logout').addEventListener('click',()=>{localStorage.removeItem('colo_manager_session');location.replace('login.html')});
+    Promise.all([api('/customers/current'),api('/customer/network-assignments?limit=100'),api('/tickets?limit=100')]).then(([customer,result,tickets])=>{document.getElementById('companyName').textContent=customer.name||'Kundenkonto';document.getElementById('initials').textContent=initials(session.user?.name||customer.name);assignments=result.items||[];document.getElementById('activeCount').textContent=assignments.filter(item=>item.status==='active').length;document.getElementById('ipv4Count').textContent=assignments.filter(item=>item.addressFamily==='ipv4').length;document.getElementById('ipv6Count').textContent=assignments.filter(item=>item.addressFamily==='ipv6').length;document.getElementById('ticketNavBadge').textContent=(tickets.items||[]).filter(item=>item.status!=='closed').length;render();}).catch(error=>{document.getElementById('assignmentList').innerHTML=`<p class="rounded-2xl bg-red-50 px-5 py-8 text-center text-sm text-red-700 xl:col-span-2">${escapeHtml(error.message)}</p>`;toast(error.message);});
+  </script>
+</body>
+</html>

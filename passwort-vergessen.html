@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Passwort für den COLO MANAGER Portalzugang zurücksetzen.">
+  <title>Passwort vergessen · COLO MANAGER</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{ink:'#001966',action:'#0667F9',mist:'#F3F6FB'},boxShadow:{soft:'0 22px 60px rgba(0,25,102,.10)'}}}}</script>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="/branding.js?v=20260811-3" defer></script>
+</head>
+<body class="min-h-screen bg-mist font-sans text-slate-700 antialiased">
+  <main class="grid min-h-screen lg:grid-cols-[.9fr_1.1fr]">
+    <section class="hidden bg-ink p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
+      <a href="/angebote.html" data-brand-lockup data-brand-logo-height="46" class="flex items-center gap-3"><span class="grid h-11 w-11 place-items-center rounded-2xl bg-action"><i data-lucide="server" class="h-5 w-5"></i></span><strong>COLO MANAGER</strong></a>
+      <div><p class="text-xs font-bold uppercase tracking-[.18em] text-blue-300">Sicherer Portalzugang</p><h1 class="mt-4 max-w-xl text-4xl font-bold tracking-tight xl:text-5xl">Zurück ins Datacenter-Portal.</h1><p class="mt-5 max-w-lg text-sm leading-relaxed text-blue-100">Fordern Sie einen einmaligen Link an. Ihr bestehendes Passwort bleibt gültig, bis Sie ein neues festgelegt haben.</p></div>
+      <p class="text-[10px] text-blue-200/70">Der Reset-Link ist einmalig und 30 Minuten gültig.</p>
+    </section>
+    <section class="flex items-center justify-center p-5 sm:p-10">
+      <div class="w-full max-w-lg rounded-[30px] bg-white p-7 shadow-soft sm:p-10">
+        <a href="/login.html" class="inline-flex items-center gap-2 text-xs font-bold text-action hover:underline"><i data-lucide="arrow-left" class="h-4 w-4"></i> Zurück zur Anmeldung</a>
+        <div id="requestContent"><p class="mt-8 text-xs font-bold uppercase tracking-[.16em] text-action">Passwort vergessen</p><h2 class="mt-3 text-3xl font-bold tracking-tight text-ink">Reset-Link anfordern</h2><p class="mt-3 text-sm leading-relaxed text-slate-500">Geben Sie die E-Mail-Adresse Ihres Portalzugangs ein.</p>
+          <form id="forgotForm" class="mt-7 space-y-5"><label class="block"><span class="text-xs font-bold text-ink">E-Mail-Adresse</span><input id="email" type="email" required autocomplete="email" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3.5 text-sm outline-none focus:border-action focus:ring-4 focus:ring-blue-100" placeholder="name@unternehmen.de"></label><button id="requestButton" class="flex w-full items-center justify-center gap-2 rounded-full bg-action px-5 py-3.5 text-sm font-bold text-white hover:bg-blue-500"><i data-lucide="mail" class="h-4 w-4"></i> Reset-Link senden</button></form>
+        </div>
+        <div id="successState" class="hidden py-8 text-center"><span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-50 text-emerald-600"><i data-lucide="mail-check" class="h-8 w-8"></i></span><h2 class="mt-5 text-2xl font-bold text-ink">Postfach prüfen</h2><p class="mt-3 text-sm leading-relaxed text-slate-500">Falls ein aktives Konto zu dieser E-Mail-Adresse existiert, wurde ein Link zum Zurücksetzen versendet. Der Link ist 30 Minuten gültig.</p><a href="/login.html" class="mt-6 inline-flex items-center gap-2 rounded-full border border-slate-200 px-5 py-3 text-xs font-bold text-ink hover:border-action hover:text-action">Zur Anmeldung</a></div>
+        <p id="errorMessage" class="mt-4 hidden rounded-2xl border border-red-200 bg-red-50 p-4 text-xs leading-relaxed text-red-700" role="alert"></p>
+      </div>
+    </section>
+  </main>
+  <script>
+    lucide.createIcons();
+    document.getElementById('forgotForm').addEventListener('submit',async event=>{event.preventDefault();const button=document.getElementById('requestButton'),error=document.getElementById('errorMessage');error.classList.add('hidden');button.disabled=true;button.classList.add('opacity-60');try{const response=await fetch('/api/v1/auth/password/forgot',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({email:document.getElementById('email').value.trim()})});const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload?.error?.message||'Die Anfrage konnte nicht verarbeitet werden.');document.getElementById('requestContent').classList.add('hidden');document.getElementById('successState').classList.remove('hidden');lucide.createIcons();}catch(exception){error.textContent=exception.message;error.classList.remove('hidden');button.disabled=false;button.classList.remove('opacity-60');}});
+  </script>
+</body>
+</html>

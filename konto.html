@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Persönliche Zugangsdaten und Zwei-Faktor-Authentifizierung im COLO MANAGER verwalten.">
+  <title>Mein Konto · COLO MANAGER</title>
+  <script>
+    (()=>{try{const session=JSON.parse(localStorage.getItem('colo_manager_session')||'null');if(!session?.accessToken){localStorage.removeItem('colo_manager_session');localStorage.removeItem('colo_manager_last_activity_at');location.replace('/login.html?next=/konto');return;}window.coloManagerSession=session;}catch{localStorage.removeItem('colo_manager_session');localStorage.removeItem('colo_manager_last_activity_at');location.replace('/login.html?next=/konto');}})();
+  </script>
+  <script src="/session-manager.js?v=20260809-3"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{ink:'#001966',action:'#0667F9',mist:'#F3F6FB',text:'#000F3D'},fontFamily:{sans:['Inter','ui-sans-serif','system-ui','sans-serif']},boxShadow:{soft:'0 18px 50px rgba(0,25,102,.08)',card:'0 8px 24px rgba(0,25,102,.06)'}}}}</script>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="/branding.js?v=20260811-3" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>.label{display:block;margin-bottom:.5rem;font-size:.75rem;font-weight:700;color:#001966}.field{width:100%;border:1px solid #e2e8f0;border-radius:1rem;padding:.8rem 1rem;font-size:.875rem;outline:none}.field:focus{border-color:#0667F9;box-shadow:0 0 0 4px #dbeafe}.qr img{margin:auto}.status-message{display:none}</style>
+</head>
+<body class="min-h-screen bg-mist font-sans text-text antialiased">
+  <div class="min-h-screen">
+    <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 px-5 backdrop-blur-xl sm:px-8 xl:px-12">
+      <div class="mx-auto flex h-20 max-w-[1250px] items-center justify-between gap-4">
+        <a id="backLink" href="/dashboard" class="inline-flex items-center gap-2 text-sm font-bold text-ink hover:text-action"><i data-lucide="arrow-left" class="h-4 w-4"></i><span id="backLabel">Zurück zum Portal</span></a>
+        <div class="flex items-center gap-3"><span id="accountName" class="hidden text-right text-xs font-bold text-ink sm:block">Benutzerkonto</span><span id="initials" class="grid h-10 w-10 place-items-center rounded-full bg-ink text-xs font-bold text-white">CM</span></div>
+      </div>
+    </header>
+
+    <main class="px-5 py-9 sm:px-8 xl:px-12 xl:py-12">
+      <div class="mx-auto max-w-[1250px]">
+        <section class="overflow-hidden rounded-[32px] bg-ink p-7 text-white shadow-soft sm:p-9">
+          <div class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end"><div><p class="text-xs font-bold uppercase tracking-[.18em] text-blue-300">Persönliche Einstellungen</p><h1 class="mt-3 text-3xl font-bold tracking-[-.035em] sm:text-4xl">Mein Konto &amp; Sicherheit</h1><p class="mt-3 max-w-2xl text-sm leading-relaxed text-blue-100">Verwalten Sie Ihre Anmeldeadresse, Ihr Passwort und den zusätzlichen Schutz durch eine Authenticator-App.</p></div><span class="inline-flex self-start items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-blue-100"><i data-lucide="timer" class="h-4 w-4"></i>5 Minuten Inaktivitätslimit</span></div>
+        </section>
+
+        <div id="globalMessage" class="status-message mt-6 rounded-2xl px-5 py-4 text-sm font-semibold" role="status" aria-live="polite"></div>
+        <div id="externalAccountNotice" class="mt-6 hidden rounded-3xl border border-blue-200 bg-blue-50 p-5 text-sm text-blue-900"><p class="font-bold">Extern verwaltetes Mitarbeiterkonto</p><p class="mt-1 text-xs leading-relaxed text-blue-700">E-Mail-Adresse, Passwort und Mehrfaktor-Richtlinien werden durch LDAP beziehungsweise Microsoft Active Directory verwaltet. Änderungen nimmt Ihre interne Administration im Verzeichnis vor.</p></div>
+
+        <div class="mt-7 grid gap-7 xl:grid-cols-2">
+          <section id="emailAccountSection" class="rounded-[30px] bg-white p-6 shadow-soft sm:p-8" aria-labelledby="emailTitle">
+            <div class="flex items-start gap-4"><span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-blue-50 text-action"><i data-lucide="mail" class="h-5 w-5"></i></span><div><p class="text-xs font-bold uppercase tracking-[.14em] text-action">Anmeldung</p><h2 id="emailTitle" class="mt-1 text-xl font-bold text-ink">E-Mail-Adresse ändern</h2><p id="currentEmail" class="mt-1 text-xs text-slate-400">Wird geladen …</p></div></div>
+            <form id="emailForm" class="mt-6 space-y-4">
+              <label><span class="label">Neue E-Mail-Adresse</span><input name="email" type="email" autocomplete="email" required class="field" placeholder="name@unternehmen.de"></label>
+              <label><span class="label">Aktuelles Passwort</span><input name="currentPassword" type="password" autocomplete="current-password" required class="field" placeholder="Zur Bestätigung"></label>
+              <label data-totp-confirm class="hidden"><span class="label">Authenticator-Code</span><input name="totpCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="field tracking-[.25em]" placeholder="000000"></label>
+              <button class="inline-flex items-center gap-2 rounded-full bg-action px-5 py-3 text-sm font-bold text-white hover:bg-blue-500"><i data-lucide="save" class="h-4 w-4"></i>E-Mail speichern</button>
+            </form>
+          </section>
+
+          <section id="passwordAccountSection" class="rounded-[30px] bg-white p-6 shadow-soft sm:p-8" aria-labelledby="passwordTitle">
+            <div class="flex items-start gap-4"><span class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-violet-50 text-violet-700"><i data-lucide="key-round" class="h-5 w-5"></i></span><div><p class="text-xs font-bold uppercase tracking-[.14em] text-violet-600">Zugangsschutz</p><h2 id="passwordTitle" class="mt-1 text-xl font-bold text-ink">Passwort ändern</h2><p class="mt-1 text-xs text-slate-400">Andere aktive Sitzungen werden danach beendet.</p></div></div>
+            <form id="passwordForm" class="mt-6 space-y-4">
+              <label><span class="label">Aktuelles Passwort</span><input name="currentPassword" type="password" autocomplete="current-password" required class="field"></label>
+              <label><span class="label">Neues Passwort</span><input name="newPassword" type="password" autocomplete="new-password" minlength="12" maxlength="128" required class="field"><span class="mt-2 block text-[11px] leading-relaxed text-slate-400">Mindestens 12 Zeichen, Groß- und Kleinbuchstaben sowie eine Zahl.</span></label>
+              <label><span class="label">Neues Passwort wiederholen</span><input name="newPasswordConfirmation" type="password" autocomplete="new-password" minlength="12" maxlength="128" required class="field"></label>
+              <label data-totp-confirm class="hidden"><span class="label">Authenticator-Code</span><input name="totpCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="field tracking-[.25em]" placeholder="000000"></label>
+              <button class="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-bold text-white hover:bg-blue-950"><i data-lucide="shield-check" class="h-4 w-4"></i>Passwort aktualisieren</button>
+            </form>
+          </section>
+        </div>
+
+        <section id="twoFactorAccountSection" class="mt-7 rounded-[30px] bg-white p-6 shadow-soft sm:p-8" aria-labelledby="twoFactorTitle">
+          <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-start"><div class="flex items-start gap-4"><span id="twoFactorIcon" class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-emerald-700"><i data-lucide="smartphone-nfc" class="h-5 w-5"></i></span><div><p class="text-xs font-bold uppercase tracking-[.14em] text-emerald-700">Zwei-Faktor-Authentifizierung</p><h2 id="twoFactorTitle" class="mt-1 text-xl font-bold text-ink">Authenticator-App</h2><p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">Zusätzlich zu Ihrem Passwort wird bei jeder Anmeldung ein zeitlich begrenzter sechsstelliger Code abgefragt.</p></div></div><span id="twoFactorBadge" class="self-start rounded-full bg-slate-100 px-3.5 py-2 text-[11px] font-bold text-slate-600">Status wird geladen</span></div>
+
+          <form id="startTwoFactorForm" class="mt-7 max-w-xl rounded-3xl border border-slate-200 bg-slate-50 p-5">
+            <label><span class="label">Aktuelles Passwort zur Einrichtung</span><input name="currentPassword" type="password" autocomplete="current-password" required class="field bg-white"></label>
+            <button class="mt-4 inline-flex items-center gap-2 rounded-full bg-action px-5 py-3 text-sm font-bold text-white hover:bg-blue-500"><i data-lucide="qr-code" class="h-4 w-4"></i>Authenticator einrichten</button>
+          </form>
+
+          <div id="twoFactorSetup" class="mt-7 hidden grid gap-7 rounded-3xl border border-blue-200 bg-blue-50 p-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:p-7">
+            <div><div id="qrCode" class="qr grid min-h-[200px] place-items-center rounded-2xl bg-white p-4"></div><p class="mt-3 text-center text-[11px] text-blue-700">QR-Code mit Ihrer Authenticator-App scannen</p></div>
+            <div><p class="text-sm font-bold text-ink">Einrichtung bestätigen</p><ol class="mt-3 list-decimal space-y-2 pl-5 text-xs leading-relaxed text-slate-600"><li>Öffnen Sie Google Authenticator, Microsoft Authenticator oder eine kompatible App.</li><li>Scannen Sie den QR-Code. Alternativ können Sie den Schlüssel manuell eingeben.</li><li>Geben Sie den aktuell angezeigten sechsstelligen Code unten ein.</li></ol><div class="mt-5 rounded-2xl bg-white p-4"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Manueller Schlüssel</p><code id="manualSecret" class="mt-2 block break-all text-sm font-bold tracking-[.16em] text-ink"></code></div><form id="confirmTwoFactorForm" class="mt-5 flex flex-col gap-3 sm:flex-row"><input name="code" required inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" class="field max-w-xs bg-white tracking-[.28em]" placeholder="000000"><button class="shrink-0 rounded-full bg-ink px-5 py-3 text-sm font-bold text-white">2FA aktivieren</button></form></div>
+          </div>
+
+          <form id="disableTwoFactorForm" class="mt-7 hidden max-w-xl rounded-3xl border border-red-200 bg-red-50 p-5">
+            <p class="text-sm font-bold text-red-950">Zwei-Faktor-Schutz deaktivieren</p><p class="mt-1 text-xs leading-relaxed text-red-700">Bestätigen Sie dies mit Passwort und aktuellem Authenticator-Code.</p>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2"><input name="currentPassword" type="password" autocomplete="current-password" required class="field bg-white" placeholder="Aktuelles Passwort"><input name="totpCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required class="field bg-white tracking-[.25em]" placeholder="Authenticator-Code"></div>
+            <button class="mt-4 rounded-full border border-red-300 bg-white px-5 py-3 text-sm font-bold text-red-700 hover:bg-red-100">2FA deaktivieren</button>
+          </form>
+        </section>
+
+        <footer class="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 py-6 text-xs text-slate-400"><span>© 2026 COLO MANAGER</span><button type="button" data-secure-logout class="inline-flex items-center gap-2 font-bold text-slate-500 hover:text-red-600"><i data-lucide="log-out" class="h-4 w-4"></i>Sicher abmelden</button></footer>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+    const session=window.coloManagerSession,apiBase='/api/v1';let account=null;
+    const message=document.getElementById('globalMessage');
+    function notify(text,success=true){message.textContent=text;message.className=`mt-6 rounded-2xl px-5 py-4 text-sm font-semibold ${success?'bg-emerald-50 text-emerald-800':'bg-red-50 text-red-700'}`;message.style.display='block';message.scrollIntoView({behavior:'smooth',block:'nearest'});setTimeout(()=>message.style.display='none',6000)}
+    async function api(path,{method='GET',body}={}){const response=await fetch(apiBase+path,{method,headers:{Authorization:`Bearer ${session.accessToken}`,Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});const payload=await response.json().catch(()=>({}));if(response.status===401&&(payload?.error?.code==='session_expired'||payload?.error?.code==='invalid_session'||payload?.error?.code==='invalid_token')){window.ColoSession.logout('inactive');throw new Error('Sitzung abgelaufen.')}if(!response.ok){const error=new Error(payload?.error?.message||'Die Änderung konnte nicht gespeichert werden.');error.code=payload?.error?.code;throw error}return payload.data}
+    const formData=form=>Object.fromEntries(new FormData(form).entries());
+    function initials(name){return String(name||'CM').split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase()}
+    function renderAccount(){document.getElementById('accountName').textContent=account.name||account.email;document.getElementById('initials').textContent=initials(account.name||account.email);document.getElementById('currentEmail').textContent=`Aktuell: ${account.email}`;document.querySelector('#emailForm [name=email]').value=account.email;const external=(account.authSource||'local')!=='local';document.getElementById('externalAccountNotice').classList.toggle('hidden',!external);['emailAccountSection','passwordAccountSection','twoFactorAccountSection'].forEach(id=>document.getElementById(id).classList.toggle('hidden',external));document.querySelectorAll('[data-totp-confirm]').forEach(item=>item.classList.toggle('hidden',!account.twoFactorEnabled));document.getElementById('startTwoFactorForm').classList.toggle('hidden',account.twoFactorEnabled);document.getElementById('disableTwoFactorForm').classList.toggle('hidden',!account.twoFactorEnabled);document.getElementById('twoFactorSetup').classList.add('hidden');const badge=document.getElementById('twoFactorBadge');badge.textContent=account.twoFactorEnabled?'Aktiv':'Nicht aktiviert';badge.className=`self-start rounded-full px-3.5 py-2 text-[11px] font-bold ${account.twoFactorEnabled?'bg-emerald-50 text-emerald-700':'bg-slate-100 text-slate-600'}`;const internal=['platform_admin','datacenter_staff'].includes(account.role);document.getElementById('backLink').href=internal?'/admin':'/dashboard';document.getElementById('backLabel').textContent=internal?'Zurück zum Mitarbeiter-Panel':'Zurück zum Kundenportal';lucide.createIcons()}
+    async function submit(form,path,method,success){const button=form.querySelector('button');button.disabled=true;try{const result=await api(path,{method,body:formData(form)});notify(success);form.querySelectorAll('input[type=password],input[name=totpCode],input[name=code]').forEach(input=>input.value='');return result}catch(error){notify(error.message,false);throw error}finally{button.disabled=false}}
+    document.getElementById('emailForm').addEventListener('submit',async event=>{event.preventDefault();try{account=await submit(event.currentTarget,'/account/email','PATCH','Ihre E-Mail-Adresse wurde aktualisiert.');if(account.authentication){session.accessToken=account.authentication.accessToken;session.expiresAt=account.authentication.expiresAt;session.idleTimeoutSeconds=account.authentication.idleTimeoutSeconds||session.idleTimeoutSeconds;delete account.authentication}session.user={...session.user,email:account.email};localStorage.setItem('colo_manager_session',JSON.stringify(session));renderAccount()}catch{}});
+    document.getElementById('passwordForm').addEventListener('submit',async event=>{event.preventDefault();try{await submit(event.currentTarget,'/account/password','PATCH','Ihr Passwort wurde geändert. Andere Sitzungen wurden sicher beendet.')}catch{}});
+    document.getElementById('startTwoFactorForm').addEventListener('submit',async event=>{event.preventDefault();try{const setup=await submit(event.currentTarget,'/account/2fa/setup','POST','Authenticator-Einrichtung gestartet.');document.getElementById('manualSecret').textContent=setup.secret;const qr=document.getElementById('qrCode');qr.innerHTML='';new QRCode(qr,{text:setup.provisioningUri,width:184,height:184,colorDark:'#001966',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});document.getElementById('twoFactorSetup').classList.remove('hidden');document.querySelector('#confirmTwoFactorForm [name=code]').focus()}catch{}});
+    document.getElementById('confirmTwoFactorForm').addEventListener('submit',async event=>{event.preventDefault();try{await submit(event.currentTarget,'/account/2fa/confirm','POST','Zwei-Faktor-Authentifizierung ist jetzt aktiv.');account.twoFactorEnabled=true;session.user={...session.user,twoFactorEnabled:true};localStorage.setItem('colo_manager_session',JSON.stringify(session));renderAccount()}catch{}});
+    document.getElementById('disableTwoFactorForm').addEventListener('submit',async event=>{event.preventDefault();try{await submit(event.currentTarget,'/account/2fa','DELETE','Zwei-Faktor-Authentifizierung wurde deaktiviert.');account.twoFactorEnabled=false;session.user={...session.user,twoFactorEnabled:false};localStorage.setItem('colo_manager_session',JSON.stringify(session));renderAccount()}catch{}});
+    api('/account').then(data=>{account=data;renderAccount()}).catch(error=>notify(error.message,false));
+  </script>
+</body>
+</html>

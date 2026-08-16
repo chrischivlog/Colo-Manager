@@ -1,0 +1,26 @@
+{
+  "name": "colo-manager/api",
+  "description": "Vendor-neutral colocation management API",
+  "type": "project",
+  "license": "proprietary",
+  "require": {
+    "php": "^8.4",
+    "ext-json": "*",
+    "ext-mongodb": "^2.3",
+    "firebase/php-jwt": "^7.1",
+    "mongodb/mongodb": "^2.3",
+    "symfony/mailer": "^8.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "ColoManager\\": "src/"
+    }
+  },
+  "scripts": {
+    "seed": "php bin/seed.php"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Colocation-Tarife, Bandbreiten und individuelle Datacenter-Anfragen von COLO MANAGER.">
+  <title>Colocation-Angebote · COLO MANAGER</title>
+  <script>
+    // Wer bereits angemeldet ist, landet auch beim Öffnen eines neuen Tabs
+    // direkt wieder in seinem rollenbezogenen Portal.
+    (() => {
+      try {
+        const session = JSON.parse(localStorage.getItem('colo_manager_session') || 'null');
+        if (!session?.accessToken) return;
+        if (Date.parse(session.expiresAt) <= Date.now()) {
+          localStorage.removeItem('colo_manager_session');
+          return;
+        }
+        window.location.replace(['platform_admin', 'datacenter_staff'].includes(session.user?.role) ? 'admin.html' : 'index.html');
+      } catch {
+        localStorage.removeItem('colo_manager_session');
+      }
+    })();
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { ink:'#001966', action:'#0667F9', mist:'#F3F6FB', text:'#000F3D' },
+      fontFamily: { sans:['Slate Pro','Inter','ui-sans-serif','system-ui','sans-serif'] },
+      boxShadow: { soft:'0 22px 60px rgba(0,25,102,.10)', card:'0 10px 30px rgba(0,25,102,.07)' }
+    } } };
+  </script>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="/branding.js?v=20260811-3" defer></script>
+  <style>
+    html { scroll-behavior:smooth; }
+    body { font-feature-settings:"ss01","cv02"; }
+    .grid-pattern { background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:44px 44px; }
+    .field { width:100%;border:1px solid #dbe3ef;border-radius:1rem;background:white;padding:.9rem 1rem;font-size:.875rem;outline:none; }
+    .field:focus { border-color:#0667F9;box-shadow:0 0 0 4px rgba(6,103,249,.1); }
+    .label { display:block;margin-bottom:.5rem;font-size:.75rem;font-weight:700;color:#001966; }
+    .config-scroll { scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent; }
+    .config-scroll::-webkit-scrollbar { width:8px; }
+    .config-scroll::-webkit-scrollbar-thumb { background:#cbd5e1;border-radius:999px; }
+    input[type="range"] { accent-color:#0667F9; }
+    .hero-youtube-frame { position:absolute;left:50%;top:50%;height:56.25vw;min-height:100%;min-width:177.78vh;width:100vw;transform:translate(-50%,-50%) scale(1.04);border:0;pointer-events:none; }
+    .hero-direct-video { position:absolute;inset:0;height:100%;width:100%;object-fit:cover;pointer-events:none; }
+    @media (prefers-reduced-motion:no-preference) { .lift { transition:transform .25s ease,box-shadow .25s ease; }.lift:hover { transform:translateY(-4px);box-shadow:0 24px 55px rgba(0,25,102,.12); } }
+  </style>
+</head>
+<body class="bg-white font-sans text-text antialiased">
+  <header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+    <div class="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-5 sm:px-8 xl:px-12">
+      <a href="angebote.html" data-brand-lockup data-brand-logo-height="46" class="flex items-center gap-3 text-ink" aria-label="COLO MANAGER Angebote">
+        <span class="grid h-11 w-11 place-items-center rounded-2xl bg-action shadow-lg shadow-blue-200" aria-hidden="true"><span class="flex w-6 flex-col gap-1"><span class="h-1.5 rounded-full bg-white"></span><span class="h-1.5 rounded-full bg-white"></span><span class="h-1.5 rounded-full bg-blue-200"></span></span></span>
+        <span class="leading-none"><span class="block text-lg font-black tracking-[-.045em] text-ink">COLO<span class="text-action">MANAGER</span></span><span class="mt-1 block text-[9px] font-bold tracking-[.22em] text-slate-400">DATACENTER SERVICES</span></span>
+      </a>
+      <nav class="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex" aria-label="Seitennavigation"><a href="#tarife" class="hover:text-action" data-branding-text="landing.navTariffs">Tarife</a><a href="#vorteile" class="hover:text-action" data-branding-text="landing.navBenefits">Vorteile</a><a href="#ablauf" class="hover:text-action" data-branding-text="landing.navProcess">Ablauf</a><a href="/status" class="hover:text-action" data-branding-text="landing.navStatus">Systemstatus</a><a href="#faq" class="hover:text-action" data-branding-text="landing.navFaq">FAQ</a></nav>
+      <div class="flex items-center gap-2"><a href="login.html" class="hidden rounded-full px-4 py-2.5 text-sm font-bold text-ink hover:text-action sm:block" data-branding-text="landing.loginLabel">Kundenlogin</a><a href="#tarife" class="rounded-full bg-action px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-500" data-branding-text="landing.inquiryLabel">Angebot anfragen</a></div>
+    </div>
+  </header>
+
+  <main>
+    <section id="landingHero" class="grid-pattern relative isolate overflow-hidden bg-ink px-5 py-20 text-white sm:px-8 lg:py-28 xl:px-12">
+      <div id="heroVideoBackground" class="absolute inset-0 z-0 hidden overflow-hidden" aria-hidden="true"><video id="heroDirectVideo" class="hero-direct-video hidden" autoplay muted loop playsinline preload="metadata" tabindex="-1"></video><iframe id="heroYoutubeFrame" class="hero-youtube-frame hidden" title="Datacenter-Hintergrundvideo" tabindex="-1" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe><div class="absolute inset-0 bg-ink/65"></div><div class="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/45 to-ink/70"></div></div>
+      <div class="pointer-events-none absolute z-10 -right-32 -top-40 h-[540px] w-[540px] rounded-full border-[90px] border-action/20"></div><div class="pointer-events-none absolute bottom-12 right-[28%] z-10 h-28 w-28 rotate-12 rounded-[34px] border-[18px] border-action/50"></div>
+      <div class="relative z-20 mx-auto grid max-w-[1340px] items-center gap-14 lg:grid-cols-[1.1fr_.9fr]">
+        <div><p class="flex items-center gap-3 text-xs font-bold uppercase tracking-[.2em] text-blue-300"><span class="h-px w-8 bg-action"></span><span data-branding-text="landing.heroEyebrow">Colocation ohne Umwege</span></p><h1 class="mt-7 text-5xl font-bold leading-[1.03] tracking-[-.05em] sm:text-6xl xl:text-7xl"><span data-branding-text="landing.heroTitle">Ihre Systeme.</span><br><span class="text-blue-300" data-branding-text="landing.heroAccent">Unser Datacenter.</span></h1><p class="mt-7 max-w-2xl text-lg leading-relaxed text-blue-100" data-branding-text="landing.heroDescription">Sichere Rackflächen, planbare Leistung und skalierbare Bandbreite – transparent kalkuliert und persönlich begleitet.</p><div class="mt-9 flex flex-wrap gap-3"><a href="#tarife" class="inline-flex items-center gap-2 rounded-full bg-action px-6 py-3.5 text-sm font-bold text-white hover:bg-blue-500"><span data-branding-text="landing.heroPrimaryCta">Rack-Typ auswählen</span><i data-lucide="arrow-down" class="h-4 w-4"></i></a><a href="#tarife" class="rounded-full border border-white/30 px-6 py-3.5 text-sm font-bold hover:bg-white hover:text-ink" data-branding-text="landing.heroSecondaryCta">Individuell anfragen</a></div><div class="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-xs text-blue-100"><span class="flex items-center gap-2"><i data-lucide="check-circle-2" class="h-4 w-4 text-emerald-400"></i><span data-branding-text="landing.heroBenefit1">24/7 Zutritt</span></span><span class="flex items-center gap-2"><i data-lucide="check-circle-2" class="h-4 w-4 text-emerald-400"></i><span data-branding-text="landing.heroBenefit2">Redundante Versorgung</span></span><span class="flex items-center gap-2"><i data-lucide="check-circle-2" class="h-4 w-4 text-emerald-400"></i><span data-branding-text="landing.heroBenefit3">Persönlicher Support</span></span></div></div>
+        <div class="rounded-[36px] border border-white/10 bg-white/[.07] p-6 shadow-2xl backdrop-blur sm:p-8"><div class="flex items-center justify-between"><div><p class="text-xs font-bold uppercase tracking-[.16em] text-blue-300" data-branding-text="landing.statusEyebrow">Betriebsstatus</p><p class="mt-2 text-xl font-bold" data-branding-text="landing.statusTitle">Datacenter bereit</p></div><span class="flex items-center gap-2 rounded-full bg-emerald-400/15 px-3 py-1.5 text-xs font-bold text-emerald-300"><span class="h-2 w-2 rounded-full bg-emerald-400"></span><span data-branding-text="landing.statusAvailable">Verfügbar</span></span></div><div class="mt-7 grid grid-cols-2 gap-3"><div class="rounded-3xl bg-white/[.07] p-5"><i data-lucide="shield-check" class="h-5 w-5 text-blue-300"></i><p class="mt-7 text-3xl font-bold" data-branding-text="landing.statusAvailabilityValue">99,99 %</p><p class="mt-1 text-xs text-blue-200" data-branding-text="landing.statusAvailabilityLabel">Verfügbarkeit</p></div><div class="rounded-3xl bg-white/[.07] p-5"><i data-lucide="headphones" class="h-5 w-5 text-blue-300"></i><p class="mt-7 text-3xl font-bold" data-branding-text="landing.statusSupportValue">24/7</p><p class="mt-1 text-xs text-blue-200" data-branding-text="landing.statusSupportLabel">Service Desk</p></div><div class="col-span-2 rounded-3xl bg-action p-5"><div class="flex items-center justify-between"><div><p class="text-xs text-blue-100" data-branding-text="landing.statusCtaEyebrow">Bereit für Ihren ersten Schritt?</p><p class="mt-1 font-bold" data-branding-text="landing.statusCtaTitle">In 2 Minuten zur Anfrage.</p></div><a href="#tarife" class="grid h-11 w-11 place-items-center rounded-full bg-white text-action"><i data-lucide="arrow-right" class="h-5 w-5"></i></a></div></div></div></div>
+      </div>
+    </section>
+
+    <section id="tarife" class="bg-mist px-5 py-20 sm:px-8 xl:px-12">
+      <div class="mx-auto max-w-[1340px]"><div class="max-w-2xl"><p class="text-xs font-bold uppercase tracking-[.18em] text-action" data-branding-text="landing.plansEyebrow">Colocation-Tarife</p><h2 class="mt-3 text-4xl font-bold tracking-[-.04em] text-ink sm:text-5xl" data-branding-text="landing.plansTitle">Ein guter Platz für Wachstum.</h2><p class="mt-5 text-base leading-relaxed text-slate-500" data-branding-text="landing.plansDescription">Entdecken Sie den vollständigen Produktkatalog. Den gewünschten und für das Produkt verfügbaren Standort wählen Sie erst im ersten Schritt der Anfrage.</p></div>
+        <div id="planLoading" class="mt-10 grid gap-5 lg:grid-cols-3"><div class="h-[430px] animate-pulse rounded-[30px] bg-white"></div><div class="h-[430px] animate-pulse rounded-[30px] bg-white"></div><div class="h-[430px] animate-pulse rounded-[30px] bg-white"></div></div><div id="planGrid" class="mt-10 hidden gap-5 lg:grid-cols-3"></div><div id="catalogError" class="mt-8 hidden rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">Die Tarife konnten momentan nicht geladen werden. Bitte versuchen Sie es später erneut.</div>
+      </div>
+    </section>
+
+    <section id="vorteile" class="px-5 py-20 sm:px-8 xl:px-12"><div class="mx-auto max-w-[1340px]"><div class="grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:items-end"><div><p class="text-xs font-bold uppercase tracking-[.18em] text-action" data-branding-text="landing.benefitsEyebrow">Ihre Infrastruktur</p><h2 class="mt-3 text-4xl font-bold tracking-[-.04em] text-ink" data-branding-text="landing.benefitsTitle">Professionell betrieben. Einfach verwaltet.</h2></div><p class="max-w-2xl text-base leading-relaxed text-slate-500" data-branding-text="landing.benefitsDescription">Von der Zutrittsplanung bis zum Verbrauchsüberblick bündelt COLO MANAGER später alle Services in einem zentralen Kundenportal.</p></div><div class="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4"><article class="lift rounded-[28px] border border-slate-200 p-6 shadow-card"><span class="grid h-11 w-11 place-items-center rounded-2xl bg-blue-50 text-action"><i data-lucide="battery-charging" class="h-5 w-5"></i></span><h3 class="mt-6 font-bold text-ink" data-branding-text="landing.benefit1Title">Redundante Energie</h3><p class="mt-2 text-sm leading-relaxed text-slate-500" data-branding-text="landing.benefit1Description">A/B-Versorgung, USV und Notstrom für planbaren Betrieb.</p></article><article class="lift rounded-[28px] border border-slate-200 p-6 shadow-card"><span class="grid h-11 w-11 place-items-center rounded-2xl bg-blue-50 text-action"><i data-lucide="network" class="h-5 w-5"></i></span><h3 class="mt-6 font-bold text-ink" data-branding-text="landing.benefit2Title">Flexible Konnektivität</h3><p class="mt-2 text-sm leading-relaxed text-slate-500" data-branding-text="landing.benefit2Description">Vom Business-Uplink bis zur dedizierten 10-Gbit/s-Anbindung.</p></article><article class="lift rounded-[28px] border border-slate-200 p-6 shadow-card"><span class="grid h-11 w-11 place-items-center rounded-2xl bg-blue-50 text-action"><i data-lucide="fingerprint" class="h-5 w-5"></i></span><h3 class="mt-6 font-bold text-ink" data-branding-text="landing.benefit3Title">Kontrollierter Zutritt</h3><p class="mt-2 text-sm leading-relaxed text-slate-500" data-branding-text="landing.benefit3Description">Dokumentierte, jederzeit planbare Arbeiten vor Ort.</p></article><article class="lift rounded-[28px] border border-slate-200 p-6 shadow-card"><span class="grid h-11 w-11 place-items-center rounded-2xl bg-blue-50 text-action"><i data-lucide="wrench" class="h-5 w-5"></i></span><h3 class="mt-6 font-bold text-ink" data-branding-text="landing.benefit4Title">Remote Hands</h3><p class="mt-2 text-sm leading-relaxed text-slate-500" data-branding-text="landing.benefit4Description">Unterstützung durch erfahrene Techniker, wenn es darauf ankommt.</p></article></div></div></section>
+
+    <section id="ablauf" class="bg-ink px-5 py-20 text-white sm:px-8 xl:px-12"><div class="mx-auto max-w-[1340px]"><p class="text-xs font-bold uppercase tracking-[.18em] text-blue-300" data-branding-text="landing.processEyebrow">So geht es weiter</p><h2 class="mt-3 text-4xl font-bold tracking-[-.04em]" data-branding-text="landing.processTitle">Vom Bedarf zum Rack.</h2><div class="mt-10 grid gap-5 md:grid-cols-3"><article class="rounded-[28px] border border-white/10 bg-white/[.06] p-7"><span class="text-4xl font-bold text-action">01</span><h3 class="mt-10 text-xl font-bold" data-branding-text="landing.process1Title">Tarif auswählen</h3><p class="mt-3 text-sm leading-relaxed text-blue-100" data-branding-text="landing.process1Description">Wählen Sie Rackspace, Leistung und eine passende Bandbreite.</p></article><article class="rounded-[28px] border border-white/10 bg-white/[.06] p-7"><span class="text-4xl font-bold text-action">02</span><h3 class="mt-10 text-xl font-bold" data-branding-text="landing.process2Title">Anfrage senden</h3><p class="mt-3 text-sm leading-relaxed text-blue-100" data-branding-text="landing.process2Description">Teilen Sie uns die wichtigsten Eckdaten Ihres Projekts mit.</p></article><article class="rounded-[28px] border border-white/10 bg-white/[.06] p-7"><span class="text-4xl font-bold text-action">03</span><h3 class="mt-10 text-xl font-bold" data-branding-text="landing.process3Title">Persönlich abstimmen</h3><p class="mt-3 text-sm leading-relaxed text-blue-100" data-branding-text="landing.process3Description">Wir prüfen Kapazität und Details und erstellen Ihr konkretes Angebot.</p></article></div></div></section>
+
+    <section id="anfrage" class="bg-mist px-5 py-20 sm:px-8 xl:px-12">
+      <div class="mx-auto overflow-hidden rounded-[38px] bg-white shadow-soft max-w-[1240px]">
+        <div class="grid lg:grid-cols-[1fr_.9fr]">
+          <div class="p-7 sm:p-12 lg:p-14"><p class="text-xs font-bold uppercase tracking-[.18em] text-action" data-branding-text="landing.requestEyebrow">Ihr Rack. Ihre Anforderungen.</p><h2 class="mt-3 max-w-xl text-4xl font-bold tracking-[-.04em] text-ink sm:text-5xl" data-branding-text="landing.requestTitle">Wählen Sie zuerst Ihren Rack-Typ.</h2><p class="mt-5 max-w-xl text-base leading-relaxed text-slate-500" data-branding-text="landing.requestDescription">Die verfügbaren Rack-Typen werden direkt aus den im Adminbereich gepflegten Tarifen geladen. Danach ergänzen Sie nur noch Bandbreite, Leistung und Laufzeit.</p><button id="openConfigurator" class="mt-8 inline-flex items-center gap-2 rounded-full bg-action px-6 py-4 text-sm font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-500 disabled:opacity-50"><span data-branding-text="landing.requestButton">Zu den Rack-Typen</span><i data-lucide="arrow-up" class="h-4 w-4"></i></button><p class="mt-4 text-xs text-slate-400" data-branding-text="landing.requestHint">Unverbindlich · ohne Registrierung · persönliche Rückmeldung</p></div>
+          <div class="relative min-h-[360px] overflow-hidden bg-ink p-7 text-white sm:p-10"><div class="absolute -right-16 -top-16 h-56 w-56 rounded-full border-[44px] border-action/30"></div><div class="relative flex h-full flex-col justify-between"><div><p class="text-xs font-bold uppercase tracking-[.18em] text-blue-300" data-branding-text="landing.requestStepsEyebrow">So funktioniert es</p><div class="mt-8 space-y-5"><div class="flex gap-4"><span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white/10 text-sm font-bold text-blue-300">01</span><div><p class="font-bold" data-branding-text="landing.requestStep1Title">Technik auswählen</p><p class="mt-1 text-sm text-blue-100" data-branding-text="landing.requestStep1Description">Rackspace, Strom und Netzwerk passend kombinieren.</p></div></div><div class="flex gap-4"><span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white/10 text-sm font-bold text-blue-300">02</span><div><p class="font-bold" data-branding-text="landing.requestStep2Title">Kontaktdaten ergänzen</p><p class="mt-1 text-sm text-blue-100" data-branding-text="landing.requestStep2Description">Damit wir Rückfragen und das Angebot richtig zuordnen.</p></div></div><div class="flex gap-4"><span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white/10 text-sm font-bold text-blue-300">03</span><div><p class="font-bold" data-branding-text="landing.requestStep3Title">Individuelles Angebot erhalten</p><p class="mt-1 text-sm text-blue-100" data-branding-text="landing.requestStep3Description">Wir prüfen Kapazität und melden uns persönlich.</p></div></div></div></div><p class="mt-10 flex items-center gap-2 text-xs text-blue-200"><i data-lucide="shield-check" class="h-4 w-4"></i><span data-branding-text="landing.requestDisclaimer">Noch keine Bestellung oder Vertragsbindung</span></p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="px-5 py-20 sm:px-8 xl:px-12"><div class="mx-auto max-w-4xl"><div class="text-center"><p class="text-xs font-bold uppercase tracking-[.18em] text-action" data-branding-text="landing.faqEyebrow">Häufige Fragen</p><h2 class="mt-3 text-4xl font-bold tracking-[-.04em] text-ink" data-branding-text="landing.faqTitle">Gut zu wissen.</h2></div><div class="mt-10 divide-y divide-slate-200 border-y border-slate-200" data-branding-faq-list><details class="group py-5"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-ink">Ist die Anfrage bereits eine Bestellung?<i data-lucide="plus" class="h-5 w-5 text-action group-open:rotate-45"></i></summary><p class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-500">Nein. Die Anfrage ist unverbindlich. Ein Vertrag entsteht erst nach technischer Abstimmung und Ihrer ausdrücklichen Bestätigung.</p></details><details class="group py-5"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-ink">Kann ich später mehr Rackspace oder Bandbreite buchen?<i data-lucide="plus" class="h-5 w-5 text-action group-open:rotate-45"></i></summary><p class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-500">Ja. Tarife und Netzwerkoptionen sind auf Wachstum ausgelegt und können abhängig von der verfügbaren Kapazität erweitert werden.</p></details><details class="group py-5"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-ink">Wie schnell kann ein Rack bereitgestellt werden?<i data-lucide="plus" class="h-5 w-5 text-action group-open:rotate-45"></i></summary><p class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-500">Das hängt von Kapazität, Verkabelung und Ihren Anforderungen ab. Nach der Anfrage erhalten Sie eine konkrete Einschätzung.</p></details></div></div></section>
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white px-5 py-10 sm:px-8 xl:px-12"><div class="mx-auto flex max-w-[1340px] flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"><div><p class="font-black tracking-[-.04em] text-ink">COLO<span class="text-action">MANAGER</span></p><p class="mt-2 text-xs text-slate-400" data-branding-text="landing.footerTagline">Vendor-neutrale Colocation Services</p></div><div class="flex flex-wrap gap-5 text-xs font-semibold text-slate-500"><a href="/status" class="hover:text-action" data-branding-text="landing.footerStatus">Systemstatus</a><a href="login.html" class="hover:text-action" data-branding-text="landing.footerLogin">Kundenlogin</a><a href="#" class="hover:text-action" data-branding-text="landing.footerPrivacy">Datenschutz</a><a href="#" class="hover:text-action" data-branding-text="landing.footerImprint">Impressum</a></div></div></footer>
+
+  <div id="configuratorModal" class="fixed inset-0 z-[80] hidden items-end justify-center bg-ink/65 p-0 backdrop-blur-sm sm:items-center sm:p-5" aria-hidden="true">
+    <div class="absolute inset-0" data-close-configurator></div>
+    <div role="dialog" aria-modal="true" aria-labelledby="configuratorTitle" class="relative flex max-h-[100dvh] w-full max-w-[1180px] flex-col overflow-hidden bg-white shadow-2xl sm:max-h-[92vh] sm:rounded-[34px]">
+      <header class="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-7"><div class="min-w-0"><p class="text-[10px] font-bold uppercase tracking-[.18em] text-action">Colocation-Konfigurator</p><h2 id="configuratorTitle" class="mt-1 truncate text-lg font-bold text-ink sm:text-xl">Ihr Rackspace</h2></div><button type="button" data-close-configurator class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-mist text-slate-500 hover:text-ink" aria-label="Konfigurator schließen"><i data-lucide="x" class="h-5 w-5"></i></button></header>
+      <div class="config-scroll grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[1fr_340px]">
+        <div class="min-w-0 p-5 sm:p-7 lg:p-9"><div id="configuratorProgress"></div><div id="configuratorError" class="mt-5 hidden rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert"></div><div id="configuratorContent" class="mt-7"></div></div>
+        <aside id="configuratorSummary" class="border-t border-slate-200 bg-mist p-5 sm:p-7 lg:border-l lg:border-t-0"></aside>
+      </div>
+      <footer id="configuratorFooter" class="flex items-center justify-between gap-3 border-t border-slate-200 bg-white px-5 py-4 sm:px-7"><button id="configuratorBack" type="button" class="inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-bold text-slate-500 hover:bg-mist hover:text-ink"><i data-lucide="arrow-left" class="h-4 w-4"></i><span>Zurück</span></button><div class="flex items-center gap-3"><span id="configuratorStepText" class="hidden text-xs text-slate-400 sm:block"></span><button id="configuratorNext" type="button" class="inline-flex items-center gap-2 rounded-full bg-action px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-500 disabled:opacity-60"><span>Weiter</span><i data-lucide="arrow-right" class="h-4 w-4"></i></button></div></footer>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+    const API_BASE_URL = '/api/v1';
+    const steps = [
+      { title:'Standort', short:'Standort' },
+      { title:'Bandbreite', short:'Netzwerk' },
+      { title:'Leistungsaufnahme', short:'Strom' },
+      { title:'Vertragslaufzeit', short:'Laufzeit' },
+      { title:'Kontaktdaten', short:'Kontakt' },
+      { title:'Zusammenfassung', short:'Prüfen' },
+    ];
+    let catalog = { plans:[], bandwidthOptions:[], locations:[], configurator:null };
+    let currentStep = 1;
+    let configuration = {};
+    let submitted = false;
+    let lastFocusedElement = null;
+
+    const money = value => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(value || 0));
+    const number = value => new Intl.NumberFormat('de-DE',{maximumFractionDigits:1}).format(Number(value || 0));
+    const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+
+    // Produktkacheln und alle Auswahlwerte werden gemeinsam aus der öffentlichen
+    // Katalog-API geladen. Im HTML bleiben dadurch keine fachlichen Werte zurück.
+    async function loadOffers() {
+      const openButton = document.getElementById('openConfigurator');
+      openButton.disabled = true;
+      try {
+        const response = await fetch(`${API_BASE_URL}/public/offers`, { headers:{'Accept':'application/json'} });
+        const payload = await response.json();
+        if (!response.ok || !payload?.data?.configurator) throw new Error();
+        catalog = payload.data;
+        renderPlans();
+        openButton.disabled = false;
+        document.getElementById('planLoading').classList.add('hidden');
+        document.getElementById('planGrid').classList.remove('hidden');
+        document.getElementById('planGrid').classList.add('grid');
+      } catch {
+        document.getElementById('planLoading').classList.add('hidden');
+        document.getElementById('catalogError').classList.remove('hidden');
+        openButton.querySelector('span').textContent = 'Konfigurator momentan nicht verfügbar';
+      }
+    }
+
+    function planAvailableAtLocation(plan, locationId) {
+      const locationIds = Array.isArray(plan.locationIds) ? plan.locationIds : [];
+      return locationIds.length === 0 || locationIds.includes(locationId);
+    }
+
+    function locationsForPlan(plan) {
+      return (catalog.locations || []).filter(location=>planAvailableAtLocation(plan, location.id));
+    }
+
+    function renderPlans() {
+      document.getElementById('planGrid').innerHTML = catalog.plans.map((plan,index) => `<article class="lift relative flex flex-col overflow-hidden rounded-[30px] ${index === 1 ? 'bg-ink text-white' : 'bg-white text-ink'} p-7 shadow-card"><div class="flex items-start justify-between gap-4"><div><p class="text-[11px] font-bold uppercase tracking-[.16em] ${index === 1 ? 'text-blue-300' : 'text-action'}">${escapeHtml(plan.code)}</p><h3 class="mt-3 text-2xl font-bold">${escapeHtml(rackProductName(plan))}</h3><p class="mt-1 text-xs ${index === 1 ? 'text-blue-200' : 'text-slate-400'}">${escapeHtml(plan.name)}</p></div>${index === 1 ? '<span class="rounded-full bg-action px-3 py-1 text-[10px] font-bold text-white">Beliebt</span>' : ''}</div><p class="mt-4 min-h-12 text-sm leading-relaxed ${index === 1 ? 'text-blue-100' : 'text-slate-500'}">${escapeHtml(plan.description)}</p><div class="mt-7"><span class="text-4xl font-bold">${money(plan.monthlyPrice)}</span><span class="text-xs ${index === 1 ? 'text-blue-200' : 'text-slate-400'}"> netto / Monat</span></div><div class="mt-7 rounded-2xl ${index === 1 ? 'bg-white/[.07]' : 'bg-mist'} p-4 text-xs"><p class="${index === 1 ? 'text-blue-200' : 'text-slate-400'}">Enthaltener Rackspace</p><p class="mt-1 text-lg font-bold">${plan.rackUnits} HE</p><p class="mt-2 ${index === 1 ? 'text-blue-200' : 'text-slate-400'}">Standort, Strom und Bandbreite wählen Sie im Konfigurator.</p></div><ul class="mt-6 flex-1 space-y-3 text-sm ${index === 1 ? 'text-blue-100' : 'text-slate-600'}">${(plan.features || []).map(feature=>`<li class="flex gap-2"><i data-lucide="check" class="mt-0.5 h-4 w-4 shrink-0 ${index === 1 ? 'text-blue-300' : 'text-action'}"></i>${escapeHtml(feature)}</li>`).join('')}</ul><button data-select-plan="${plan.id}" class="mt-7 w-full rounded-full ${index === 1 ? 'bg-action text-white hover:bg-blue-500' : 'border border-slate-200 text-ink hover:border-action hover:text-action'} px-5 py-3.5 text-sm font-bold">${escapeHtml(rackProductName(plan))} anfragen</button><p class="mt-3 text-center text-[10px] ${index === 1 ? 'text-blue-300' : 'text-slate-400'}">Basispreis netto · Einrichtung einmalig netto ${money(plan.setupFee)}</p></article>`).join('');
+      if (!catalog.plans.length) document.getElementById('planGrid').innerHTML = '<div class="rounded-[28px] border border-amber-200 bg-amber-50 p-7 text-sm leading-relaxed text-amber-900 lg:col-span-3"><strong class="block text-base">Aktuell ist kein Tarif veröffentlicht.</strong><span class="mt-2 block">Kontaktieren Sie uns für eine individuelle Colocation-Lösung.</span></div>';
+      document.querySelectorAll('[data-select-plan]').forEach(button => button.addEventListener('click',()=>openConfigurator(button.dataset.selectPlan)));
+      lucide.createIcons();
+    }
+
+    function rackProductName(plan) {
+      const units = Number(plan.rackUnits);
+      if (units === 1) return '1 Höheneinheit';
+      if (units === 22) return 'Halbes Rack';
+      if (units === 44) return 'Volles Rack';
+      return `${units} Höheneinheiten`;
+    }
+
+    // Die angeklickte Produktkachel legt den Tarif und damit den Rack-Typ fest.
+    // Die kürzere Klickstrecke ergänzt nur noch die variablen Anforderungen.
+    function openConfigurator(planId) {
+      const plan = catalog.plans.find(item => item.id === planId) || catalog.plans[0];
+      if (!plan || !catalog.configurator) return;
+      const presets = catalog.configurator.rackSpace.presets || [];
+      const matchingPreset = presets.find(item => Number(item.units) === Number(plan.rackUnits));
+      const powerOptions = catalog.configurator.powerOptionsKw || [];
+      const selectedPower = powerOptions.find(value => Number(value) === Number(plan.powerKw)) ?? powerOptions[0];
+      const flatOptions = catalog.bandwidthOptions.filter(item => (item.billingModel || 'flat') === 'flat');
+      configuration = {
+        planId: plan.id,
+        // Der Standort wird niemals von der Karte oder Produktübersicht
+        // vorgewählt. Der Interessent entscheidet bewusst im ersten Schritt.
+        locationId: '',
+        rackUnits: Number(plan.rackUnits),
+        rackType: matchingPreset?.type || 'units',
+        powerKw: Number(selectedPower),
+        networkBillingModel: 'flat',
+        bandwidthOptionId: flatOptions[0]?.id || catalog.bandwidthOptions[0]?.id || '',
+        contractMonths: Number(catalog.configurator.contractTermsMonths?.[0] || 12),
+        company:'', contactName:'', email:'', phone:'', message:'', website:'', consent:false,
+        billingAddress:{street:'',postalCode:'',city:'',country:'DE'},
+      };
+      currentStep = 1;
+      submitted = false;
+      lastFocusedElement = document.activeElement;
+      const modal = document.getElementById('configuratorModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      modal.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('configuratorTitle').textContent = plan.name;
+      renderConfigurator();
+      setTimeout(()=>document.querySelector('[data-close-configurator]')?.focus(), 0);
+    }
+
+    function closeConfigurator() {
+      const modal = document.getElementById('configuratorModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      modal.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+      lastFocusedElement?.focus?.();
+    }
+
+    function renderConfigurator() {
+      const error = document.getElementById('configuratorError');
+      error.classList.add('hidden');
+      error.textContent = '';
+      if (submitted) return renderSuccess();
+      renderProgress();
+      renderStep();
+      renderSummary();
+      renderFooter();
+      bindStepEvents();
+      lucide.createIcons();
+    }
+
+    function renderProgress() {
+      document.getElementById('configuratorProgress').innerHTML = `<div class="flex items-center gap-2" aria-label="Fortschritt">${steps.map((step,index)=>{const position=index+1;const state=position<currentStep?'done':position===currentStep?'active':'upcoming';return `<div class="flex min-w-0 flex-1 items-center gap-2"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-bold ${state==='done'?'bg-emerald-500 text-white':state==='active'?'bg-action text-white':'bg-slate-100 text-slate-400'}">${state==='done'?'<i data-lucide="check" class="h-4 w-4"></i>':position}</span><span class="hidden truncate text-[11px] font-bold ${state==='active'?'text-ink':'text-slate-400'} xl:block">${step.short}</span>${position<steps.length?'<span class="h-px flex-1 bg-slate-200"></span>':''}</div>`}).join('')}</div>`;
+    }
+
+    // Jeder Schritt wird aus demselben Zustandsobjekt gerendert. So bleiben die
+    // Auswahl und Kontaktdaten auch beim Vor- und Zurücknavigieren erhalten.
+    function renderStep() {
+      const plan = selectedPlan();
+      const content = document.getElementById('configuratorContent');
+      if (currentStep === 1) {
+        const locations = locationsForPlan(plan);
+        content.innerHTML = `<div><p class="text-xs font-bold uppercase tracking-[.16em] text-action">Schritt 1</p><div class="mt-2 flex flex-wrap items-center gap-3"><h3 class="text-2xl font-bold tracking-[-.03em] text-ink">An welchem Standort benötigen Sie Rackspace?</h3><span class="rounded-full bg-mist px-3 py-1.5 text-[10px] font-bold text-action">${escapeHtml(rackProductName(plan))} · ${plan.rackUnits} HE</span></div><p class="mt-3 text-sm leading-relaxed text-slate-500">Wählen Sie jetzt das gewünschte Datacenter. Angezeigt werden ausschließlich die aktiven Standorte, an denen dieses Produkt verfügbar ist.</p><div class="mt-7 grid gap-3 sm:grid-cols-2">${locations.length?locations.map(location=>choiceCard(`data-location="${location.id}"`,configuration.locationId===location.id,'map-pin',location.name,[location.code,location.city,location.country].filter(Boolean).join(' · '))).join(''):'<div class="sm:col-span-2 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Dieses Produkt ist derzeit an keinem aktiven Standort verfügbar. Bitte wählen Sie ein anderes Produkt oder kontaktieren Sie uns.</div>'}</div></div>`;
+      } else if (currentStep === 2) {
+        const models = catalog.configurator.networkBillingModels || [];
+        const options = bandwidthOptionsForModel();
+        content.innerHTML = `<div><p class="text-xs font-bold uppercase tracking-[.16em] text-action">Schritt 1</p><div class="mt-2 flex flex-wrap items-center gap-3"><h3 class="text-2xl font-bold tracking-[-.03em] text-ink">Welche Bandbreite benötigen Sie?</h3><span class="rounded-full bg-mist px-3 py-1.5 text-[10px] font-bold text-action">${escapeHtml(rackProductName(plan))} · ${plan.rackUnits} HE</span></div><p class="mt-3 text-sm leading-relaxed text-slate-500">Ihr Rack-Typ steht bereits fest. Wählen Sie jetzt zwischen planbarer Flatrate und volumenbasierter Nutzung sowie die gewünschte symmetrische Bandbreite.</p><div class="mt-7 grid gap-3 sm:grid-cols-2">${models.map(model=>choiceCard(`data-network-model="${model.id}"`,configuration.networkBillingModel===model.id,model.id==='flat'?'infinity':'chart-no-axes-column',model.name,model.description)).join('')}</div><div class="mt-7"><p class="label">Verfügbare Bandbreiten</p><div class="grid gap-3 sm:grid-cols-2">${options.length?options.map(option=>bandwidthCard(option)).join(''):'<div class="sm:col-span-2 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Für dieses Tarifmodell ist momentan keine aktive Bandbreite hinterlegt.</div>'}</div></div></div>`;
+      } else if (currentStep === 3) {
+        content.innerHTML = `<div><p class="text-xs font-bold uppercase tracking-[.16em] text-action">Schritt 2</p><h3 class="mt-2 text-2xl font-bold tracking-[-.03em] text-ink">Welche Leistungsaufnahme planen Sie?</h3><p class="mt-3 text-sm leading-relaxed text-slate-500">Wählen Sie die benötigte elektrische Leistung. Die genaue Absicherung und A/B-Verteilung stimmen wir im Angebot mit Ihnen ab.</p><div class="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3">${catalog.configurator.powerOptionsKw.map(value=>choiceCard(`data-power="${value}"`,Number(configuration.powerKw)===Number(value),'zap',`${number(value)} kW`,'Redundante A/B-Versorgung')).join('')}</div><div class="mt-5 flex gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs leading-relaxed text-blue-800"><i data-lucide="info" class="mt-0.5 h-4 w-4 shrink-0"></i><p>Die Auswahl beschreibt Ihre geplante Leistungsaufnahme. Messung, Reserve und konkrete Stromkreise werden technisch geprüft.</p></div></div>`;
+      } else if (currentStep === 4) {
+        content.innerHTML = `<div><p class="text-xs font-bold uppercase tracking-[.16em] text-action">Schritt 3</p><h3 class="mt-2 text-2xl font-bold tracking-[-.03em] text-ink">Welche Laufzeit passt zu Ihrer Planung?</h3><p class="mt-3 text-sm leading-relaxed text-slate-500">Die Laufzeit fließt in Ihr individuelles Angebot ein. Die Anfrage selbst bleibt unverbindlich.</p><div class="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">${catalog.configurator.contractTermsMonths.map(months=>`<button type="button" data-contract="${months}" class="rounded-3xl border p-5 text-left transition ${Number(configuration.contractMonths)===Number(months)?'border-action bg-blue-50 ring-2 ring-action/10':'border-slate-200 bg-white hover:border-blue-300'}"><span class="text-3xl font-bold text-ink">${months}</span><span class="mt-1 block text-xs font-semibold text-slate-500">Monate</span>${months===24?'<span class="mt-4 inline-block rounded-full bg-action px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white">Beliebt</span>':''}</button>`).join('')}</div><div class="mt-6 rounded-2xl bg-mist p-4 text-xs leading-relaxed text-slate-500">Ein Vertrag entsteht erst nach Ihrer ausdrücklichen Annahme des finalen Angebots.</div></div>`;
+      } else if (currentStep === 5) {
+        content.innerHTML = `<div><p class="text-xs font-bold uppercase tracking-[.16em] text-action">Schritt 4</p><h3 class="mt-2 text-2xl font-bold tracking-[-.03em] text-ink">Wie dürfen wir Sie erreichen?</h3><p class="mt-3 text-sm leading-relaxed text-slate-500">Wir verwenden Ihre Angaben ausschließlich zur Bearbeitung dieser Anfrage und übernehmen die Anschrift später in Ihren Vertragsentwurf.</p><form id="contactForm" class="mt-7 space-y-5" novalidate><div class="grid gap-5 sm:grid-cols-2"><label><span class="label">Unternehmen *</span><input name="company" class="field" required autocomplete="organization" value="${escapeHtml(configuration.company)}" placeholder="Muster IT GmbH"></label><label><span class="label">Ansprechpartner *</span><input name="contactName" class="field" required autocomplete="name" value="${escapeHtml(configuration.contactName)}" placeholder="Vor- und Nachname"></label><label><span class="label">Geschäftliche E-Mail *</span><input name="email" type="email" class="field" required autocomplete="email" value="${escapeHtml(configuration.email)}" placeholder="name@unternehmen.de"></label><label><span class="label">Telefon</span><input name="phone" class="field" autocomplete="tel" value="${escapeHtml(configuration.phone)}" placeholder="+49 69 123456"></label></div><fieldset class="rounded-3xl border border-slate-200 p-5"><legend class="px-2 text-xs font-bold uppercase tracking-[.12em] text-action">Rechnungsadresse</legend><div class="grid gap-5 sm:grid-cols-2"><label class="sm:col-span-2"><span class="label">Straße und Hausnummer *</span><input name="street" data-address-field class="field" required autocomplete="street-address" value="${escapeHtml(configuration.billingAddress.street)}" placeholder="Musterstraße 12"></label><label><span class="label">Postleitzahl *</span><input name="postalCode" data-address-field class="field" required autocomplete="postal-code" value="${escapeHtml(configuration.billingAddress.postalCode)}" placeholder="10115"></label><label><span class="label">Ort *</span><input name="city" data-address-field class="field" required autocomplete="address-level2" value="${escapeHtml(configuration.billingAddress.city)}" placeholder="Berlin"></label><label class="sm:col-span-2"><span class="label">Land *</span><select name="country" data-address-field class="field" required autocomplete="country">${[['DE','Deutschland'],['AT','Österreich'],['CH','Schweiz'],['NL','Niederlande'],['BE','Belgien'],['LU','Luxemburg'],['FR','Frankreich'],['PL','Polen'],['CZ','Tschechien'],['DK','Dänemark']].map(([code,label])=>`<option value="${code}" ${configuration.billingAddress.country===code?'selected':''}>${label}</option>`).join('')}</select></label></div></fieldset><label><span class="label">Ergänzende Anforderungen</span><textarea name="message" rows="4" class="field resize-none" placeholder="Besondere Anforderungen an Zutritt, Verkabelung oder Bereitstellung">${escapeHtml(configuration.message)}</textarea></label><label class="hidden" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" value="${escapeHtml(configuration.website)}"></label><label class="flex items-start gap-3 rounded-2xl bg-mist p-4 text-xs leading-relaxed text-slate-600"><input name="consent" type="checkbox" required ${configuration.consent?'checked':''} class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-action focus:ring-action"><span>Ich stimme zu, dass meine Angaben zur Bearbeitung der Anfrage gespeichert und verwendet werden. *</span></label></form></div>`;
+      } else if (currentStep === 6) {
+        const bandwidth = selectedBandwidth();
+        content.innerHTML = `<div><p class="text-xs font-bold uppercase tracking-[.16em] text-action">Schritt 5</p><h3 class="mt-2 text-2xl font-bold tracking-[-.03em] text-ink">Passt alles für Ihre Anfrage?</h3><p class="mt-3 text-sm leading-relaxed text-slate-500">Prüfen Sie Ihre Auswahl. Nach dem Absenden erhalten Sie eine Eingangsbestätigung per E-Mail.</p><div class="mt-7 grid gap-3 sm:grid-cols-2"><div class="rounded-3xl border border-slate-200 p-5"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rack & Leistung</p><p class="mt-3 font-bold text-ink">${rackLabel()} · ${number(configuration.powerKw)} kW</p><p class="mt-1 text-xs text-slate-500">Basis: ${escapeHtml(plan.name)}</p></div><div class="rounded-3xl border border-slate-200 p-5"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Netzwerk & Laufzeit</p><p class="mt-3 font-bold text-ink">${escapeHtml(bandwidth?.name || '–')}</p><p class="mt-1 text-xs text-slate-500">${billingModelLabel()} · ${configuration.contractMonths} Monate</p></div><div class="rounded-3xl border border-slate-200 p-5 sm:col-span-2"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kontakt & Rechnungsadresse</p><p class="mt-3 font-bold text-ink">${escapeHtml(configuration.company)} · ${escapeHtml(configuration.contactName)}</p><p class="mt-1 text-xs text-slate-500">${escapeHtml(configuration.email)}${configuration.phone?` · ${escapeHtml(configuration.phone)}`:''}</p><p class="mt-3 text-xs leading-relaxed text-slate-500">${escapeHtml(configuration.billingAddress.street)}<br>${escapeHtml(configuration.billingAddress.postalCode)} ${escapeHtml(configuration.billingAddress.city)} · ${escapeHtml(configuration.billingAddress.country)}</p>${configuration.message?`<p class="mt-3 border-t border-slate-100 pt-3 text-xs leading-relaxed text-slate-500">${escapeHtml(configuration.message)}</p>`:''}</div></div><div class="mt-5 flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs leading-relaxed text-emerald-800"><i data-lucide="mail-check" class="mt-0.5 h-4 w-4 shrink-0"></i><p>Wir erfassen Ihre Konfiguration als Lead, prüfen die technischen Details und erstellen anschließend ein individuelles Angebot.</p></div></div>`;
+      }
+      const visibleStepLabel = content.querySelector('p.text-action');
+      if (visibleStepLabel?.textContent.startsWith('Schritt')) visibleStepLabel.textContent = `Schritt ${currentStep}`;
+      if (currentStep === 6) {
+        const location = selectedLocation();
+        content.querySelector('.mt-7.grid')?.insertAdjacentHTML('afterbegin', `<div class="rounded-3xl border border-slate-200 p-5 sm:col-span-2"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Gewünschter Standort</p><p class="mt-3 font-bold text-ink">${escapeHtml(location?.name || '–')}</p><p class="mt-1 text-xs text-slate-500">${escapeHtml([location?.code,location?.city,location?.country].filter(Boolean).join(' · '))}</p></div>`);
+      }
+    }
+
+    function choiceCard(attributes, active, icon, title, description) {
+      return `<button type="button" ${attributes} class="rounded-3xl border p-5 text-left transition ${active?'border-action bg-blue-50 ring-2 ring-action/10':'border-slate-200 bg-white hover:border-blue-300'}"><span class="grid h-10 w-10 place-items-center rounded-2xl ${active?'bg-action text-white':'bg-mist text-action'}"><i data-lucide="${icon}" class="h-5 w-5"></i></span><span class="mt-5 block text-sm font-bold text-ink">${escapeHtml(title)}</span><span class="mt-1 block text-xs leading-relaxed text-slate-500">${escapeHtml(description)}</span></button>`;
+    }
+
+    function bandwidthCard(option) {
+      const active = configuration.bandwidthOptionId === option.id;
+      const detail = (option.billingModel || 'flat') === 'volume'
+        ? `${number(option.includedTransferTb)} TB inklusive${option.overagePricePerTb?` · danach ${money(option.overagePricePerTb)}/TB`:''}`
+        : 'Ohne Volumenlimit';
+      return `<button type="button" data-bandwidth="${option.id}" class="rounded-3xl border p-5 text-left transition ${active?'border-action bg-blue-50 ring-2 ring-action/10':'border-slate-200 bg-white hover:border-blue-300'}"><div class="flex items-start justify-between gap-3"><div><p class="text-lg font-bold text-ink">${number(option.committedMbps)} Mbit/s</p><p class="mt-1 text-xs font-semibold text-action">${option.symmetric===false?'asymmetrisch':'symmetrisch'}</p></div><span class="grid h-8 w-8 place-items-center rounded-full ${active?'bg-action text-white':'bg-mist text-slate-400'}">${active?'<i data-lucide="check" class="h-4 w-4"></i>':'<i data-lucide="network" class="h-4 w-4"></i>'}</span></div><p class="mt-4 text-sm font-bold text-ink">${escapeHtml(option.name)}</p><p class="mt-1 text-xs leading-relaxed text-slate-500">${escapeHtml(detail)}</p></button>`;
+    }
+
+    function renderSummary() {
+      const plan = selectedPlan();
+      const bandwidth = selectedBandwidth();
+      document.getElementById('configuratorSummary').innerHTML = `<div class="lg:sticky lg:top-0"><div class="flex items-center justify-between"><p class="text-xs font-bold uppercase tracking-[.16em] text-action">Ihre Auswahl</p><span class="rounded-full bg-white px-3 py-1 text-[10px] font-bold text-slate-500">Unverbindlich</span></div><div class="mt-5 rounded-3xl bg-ink p-5 text-white"><p class="text-[10px] font-bold uppercase tracking-wider text-blue-300">Ausgangstarif</p><p class="mt-2 text-lg font-bold">${escapeHtml(plan?.name || '–')}</p><p class="mt-5 text-2xl font-bold">ab ${money(plan?.monthlyPrice || 0)}<span class="text-xs font-normal text-blue-200"> netto / Monat</span></p><p class="mt-2 text-[10px] leading-relaxed text-blue-200">Alle Preise netto zuzüglich gesetzlicher Umsatzsteuer. Der finale Preis wird anhand Ihrer Konfiguration individuell kalkuliert.</p></div><dl class="mt-5 space-y-4 text-sm"><div class="flex items-start justify-between gap-4"><dt class="flex items-center gap-2 text-slate-500"><i data-lucide="server" class="h-4 w-4"></i> Rackspace</dt><dd class="text-right font-bold text-ink">${rackLabel()}</dd></div><div class="flex items-start justify-between gap-4"><dt class="flex items-center gap-2 text-slate-500"><i data-lucide="zap" class="h-4 w-4"></i> Leistung</dt><dd class="text-right font-bold text-ink">${number(configuration.powerKw)} kW</dd></div><div class="flex items-start justify-between gap-4"><dt class="flex items-center gap-2 text-slate-500"><i data-lucide="network" class="h-4 w-4"></i> Netzwerk</dt><dd class="max-w-[160px] text-right font-bold text-ink">${bandwidth?`${number(bandwidth.committedMbps)} Mbit/s<br><span class="text-[10px] font-normal text-slate-400">${billingModelLabel()}</span>`:'–'}</dd></div><div class="flex items-start justify-between gap-4"><dt class="flex items-center gap-2 text-slate-500"><i data-lucide="calendar-clock" class="h-4 w-4"></i> Laufzeit</dt><dd class="text-right font-bold text-ink">${configuration.contractMonths} Monate</dd></div></dl><div class="mt-6 border-t border-slate-200 pt-5"><p class="flex items-center gap-2 text-xs font-bold text-ink"><i data-lucide="user-round-check" class="h-4 w-4 text-action"></i> Persönlich geprüft</p><p class="mt-2 text-[11px] leading-relaxed text-slate-500">Ein Datacenter-Ansprechpartner prüft Kapazität, Stromkreise und Bereitstellung vor dem Angebot.</p></div></div>`;
+      const location = selectedLocation();
+      document.querySelector('#configuratorSummary dl')?.insertAdjacentHTML('afterbegin', `<div class="flex items-start justify-between gap-4"><dt class="flex items-center gap-2 text-slate-500"><i data-lucide="map-pin" class="h-4 w-4"></i> Standort</dt><dd class="max-w-[165px] text-right font-bold text-ink">${escapeHtml(location?.name || '–')}<br><span class="text-[10px] font-normal text-slate-400">${escapeHtml(location?.city || '')}</span></dd></div>`);
+    }
+
+    function renderFooter() {
+      document.getElementById('configuratorBack').classList.toggle('invisible', currentStep === 1);
+      document.getElementById('configuratorStepText').textContent = `Schritt ${currentStep} von ${steps.length}`;
+      const next = document.getElementById('configuratorNext');
+      next.disabled = false;
+      next.innerHTML = currentStep === steps.length
+        ? '<span>Anfrage absenden</span><i data-lucide="send" class="h-4 w-4"></i>'
+        : '<span>Weiter</span><i data-lucide="arrow-right" class="h-4 w-4"></i>';
+    }
+
+    function bindStepEvents() {
+      document.querySelectorAll('[data-location]').forEach(button=>button.addEventListener('click',()=>{configuration.locationId=button.dataset.location;renderConfigurator();}));
+      document.querySelectorAll('[data-power]').forEach(button=>button.addEventListener('click',()=>{configuration.powerKw=Number(button.dataset.power);renderConfigurator();}));
+      document.querySelectorAll('[data-network-model]').forEach(button=>button.addEventListener('click',()=>{configuration.networkBillingModel=button.dataset.networkModel;configuration.bandwidthOptionId=bandwidthOptionsForModel()[0]?.id||'';renderConfigurator();}));
+      document.querySelectorAll('[data-bandwidth]').forEach(button=>button.addEventListener('click',()=>{configuration.bandwidthOptionId=button.dataset.bandwidth;renderConfigurator();}));
+      document.querySelectorAll('[data-contract]').forEach(button=>button.addEventListener('click',()=>{configuration.contractMonths=Number(button.dataset.contract);renderConfigurator();}));
+      const contactForm = document.getElementById('contactForm');
+      contactForm?.querySelectorAll('input,textarea,select').forEach(field=>field.addEventListener('input',()=>captureContactField(field)));
+    }
+
+    // Adressfelder werden als zusammengehöriges API-Objekt geführt; alle
+    // übrigen Felder bleiben Teil der Anfrage auf oberster Ebene.
+    function captureContactField(field) {
+      if (field.hasAttribute('data-address-field')) configuration.billingAddress[field.name] = field.value;
+      else configuration[field.name] = field.type === 'checkbox' ? field.checked : field.value;
+    }
+
+    function selectedPlan() { return catalog.plans.find(item=>item.id===configuration.planId); }
+    function selectedLocation() { return catalog.locations.find(item=>item.id===configuration.locationId); }
+    function selectedBandwidth() { return catalog.bandwidthOptions.find(item=>item.id===configuration.bandwidthOptionId); }
+    function bandwidthOptionsForModel() { return catalog.bandwidthOptions.filter(item=>(item.billingModel||'flat')===configuration.networkBillingModel); }
+    function billingModelLabel() { return configuration.networkBillingModel === 'volume' ? 'Volumentarif' : 'Flatrate'; }
+    function rackLabel() { return configuration.rackType === 'half' ? `Halbes Rack · ${configuration.rackUnits} HE` : configuration.rackType === 'full' ? `Ganzes Rack · ${configuration.rackUnits} HE` : `${configuration.rackUnits} HE`; }
+
+    function showConfiguratorError(message) {
+      const error = document.getElementById('configuratorError');
+      error.textContent = message;
+      error.classList.remove('hidden');
+      error.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+
+    function validateCurrentStep() {
+      if (currentStep === 1 && !selectedLocation()) {
+        showConfiguratorError('Bitte wählen Sie einen verfügbaren Datacenter-Standort aus.');
+        return false;
+      }
+      if (currentStep === 2 && !selectedBandwidth()) {
+        showConfiguratorError('Bitte wählen Sie eine verfügbare Bandbreite aus.');
+        return false;
+      }
+      if (currentStep === 5) {
+        const form = document.getElementById('contactForm');
+        form.querySelectorAll('input,textarea,select').forEach(captureContactField);
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          showConfiguratorError('Bitte füllen Sie alle Pflichtfelder korrekt aus und bestätigen Sie die Datenverarbeitung.');
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Erst die Zusammenfassung sendet den vollständig geprüften Lead an die API.
+    async function submitInquiry() {
+      const button = document.getElementById('configuratorNext');
+      button.disabled = true;
+      button.innerHTML = '<span>Anfrage wird gesendet …</span><i data-lucide="loader-circle" class="h-4 w-4 animate-spin"></i>';
+      lucide.createIcons();
+      try {
+        const response = await fetch(`${API_BASE_URL}/public/inquiries`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Accept':'application/json'},
+          body:JSON.stringify(configuration),
+        });
+        const payload = await response.json().catch(()=>({}));
+        if (!response.ok) throw new Error(payload?.error?.message || 'Die Anfrage konnte nicht gesendet werden.');
+        submitted = true;
+        configuration.confirmationMailStatus = payload?.data?.confirmationMailStatus;
+        configuration.ticketNumber = payload?.data?.ticketNumber;
+        renderConfigurator();
+      } catch(error) {
+        showConfiguratorError(error.message);
+        renderFooter();
+        lucide.createIcons();
+      }
+    }
+
+    function renderSuccess() {
+      document.getElementById('configuratorProgress').innerHTML = '';
+      document.getElementById('configuratorError').classList.add('hidden');
+      document.getElementById('configuratorContent').innerHTML = `<div class="py-6 text-center sm:py-12"><span class="mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-50 text-emerald-600"><i data-lucide="check" class="h-9 w-9"></i></span><p class="mt-7 text-xs font-bold uppercase tracking-[.16em] text-emerald-600">Erfolgreich übermittelt</p><h3 class="mt-3 text-3xl font-bold tracking-[-.04em] text-ink">Ihre Konfiguration ist bei uns.</h3>${configuration.ticketNumber?`<p class="mx-auto mt-4 inline-flex rounded-full bg-blue-50 px-4 py-2 text-xs font-bold text-action">Lead-Ticket ${escapeHtml(configuration.ticketNumber)}</p>`:''}<p class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-slate-500">Wir haben Ihre Daten als Lead-Ticket im Datacenter erfasst. Unser Team prüft die technischen Details und erstellt Ihr individuelles Angebot. Bitte geben Sie uns dafür ein wenig Zeit.</p><div class="mx-auto mt-7 max-w-lg rounded-2xl bg-mist p-4 text-left text-xs leading-relaxed text-slate-600"><p class="flex gap-3"><i data-lucide="${configuration.confirmationMailStatus==='sent'?'mail-check':'info'}" class="mt-0.5 h-4 w-4 shrink-0 text-action"></i><span>${configuration.confirmationMailStatus==='sent'?`Eine Eingangsbestätigung wurde an <strong class="text-ink">${escapeHtml(configuration.email)}</strong> gesendet.`:'Ihre Anfrage ist sicher gespeichert. Ein Ansprechpartner meldet sich persönlich bei Ihnen.'}</span></p></div></div>`;
+      renderSummary();
+      document.getElementById('configuratorBack').classList.add('hidden');
+      document.getElementById('configuratorStepText').textContent = 'Anfrage eingegangen';
+      const next = document.getElementById('configuratorNext');
+      next.disabled = false;
+      next.innerHTML = '<span>Fertig</span><i data-lucide="check" class="h-4 w-4"></i>';
+      lucide.createIcons();
+    }
+
+    document.getElementById('openConfigurator').addEventListener('click',()=>document.getElementById('tarife').scrollIntoView({behavior:'smooth'}));
+    document.getElementById('configuratorBack').addEventListener('click',()=>{if(currentStep>1){currentStep-=1;renderConfigurator();}});
+    document.getElementById('configuratorNext').addEventListener('click',()=>{
+      if (submitted) return closeConfigurator();
+      if (!validateCurrentStep()) return;
+      if (currentStep < steps.length) { currentStep += 1; renderConfigurator(); }
+      else submitInquiry();
+    });
+    document.querySelectorAll('[data-close-configurator]').forEach(element=>element.addEventListener('click',closeConfigurator));
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.getElementById('configuratorModal').getAttribute('aria-hidden')==='false')closeConfigurator();});
+
+    /** Aktiviert YouTube oder eine direkte Videodatei nur bei gültiger Branding-Konfiguration. */
+    function applyHeroVideo(branding = {}) {
+      const container = document.getElementById('heroVideoBackground');
+      const directVideo = document.getElementById('heroDirectVideo');
+      const youtubeFrame = document.getElementById('heroYoutubeFrame');
+      const type = branding.heroVideoType;
+      const url = String(branding.heroVideoUrl || '');
+      const youtubeId = String(branding.heroYoutubeVideoId || '');
+      const sourceKey = type === 'youtube' ? `youtube:${youtubeId}` : type === 'direct' ? `direct:${url}` : '';
+      if (container.dataset.source === sourceKey) return;
+      container.dataset.source = sourceKey;
+
+      directVideo.pause();
+      directVideo.removeAttribute('src');
+      directVideo.load();
+      youtubeFrame.removeAttribute('src');
+      directVideo.classList.add('hidden');
+      youtubeFrame.classList.add('hidden');
+      container.classList.toggle('hidden', sourceKey === '');
+
+      if (type === 'youtube' && /^[A-Za-z0-9_-]{11}$/.test(youtubeId)) {
+        youtubeFrame.src = `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&mute=1&controls=0&disablekb=1&fs=0&loop=1&modestbranding=1&playsinline=1&rel=0&playlist=${youtubeId}`;
+        youtubeFrame.classList.remove('hidden');
+      } else if (type === 'direct' && /^https?:\/\//i.test(url)) {
+        directVideo.src = url;
+        directVideo.classList.remove('hidden');
+        directVideo.load();
+        directVideo.play().catch(() => {});
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    document.addEventListener('colo:branding-applied', event => applyHeroVideo(event.detail));
+    window.ColoBranding?.ready.then(applyHeroVideo);
+    loadOffers();
+  </script>
+</body>
+</html>

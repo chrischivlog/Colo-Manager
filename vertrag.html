@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Vertragsunterlagen sicher herunterladen und unterschrieben zurückgeben.">
+  <title>Vertrag unterzeichnen · COLO MANAGER</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{ink:'#001966',action:'#0667F9',mist:'#F3F6FB',brand:'#0075BE'},boxShadow:{soft:'0 22px 60px rgba(0,25,102,.10)'}}}}</script>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="/branding.js?v=20260811-3" defer></script>
+</head>
+<body class="min-h-screen bg-mist font-sans text-slate-700 antialiased">
+  <header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
+      <a href="/angebote.html" data-brand-lockup data-brand-logo-height="42" class="flex items-center gap-3 text-ink"><span class="grid h-10 w-10 place-items-center rounded-2xl bg-action text-white"><i data-lucide="server" class="h-5 w-5"></i></span><span><strong class="block tracking-tight">COLO MANAGER</strong><span class="block text-[9px] font-bold tracking-[.18em] text-slate-400">SECURE DOCUMENTS</span></span></a>
+      <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-[10px] font-bold text-emerald-700"><i data-lucide="shield-check" class="h-4 w-4"></i> Persönlicher Vertragslink</span>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-16">
+    <div id="loadingState" class="rounded-[30px] bg-white p-10 text-center shadow-soft"><span class="mx-auto grid h-14 w-14 animate-pulse place-items-center rounded-2xl bg-blue-50 text-action"><i data-lucide="file-signature" class="h-7 w-7"></i></span><p class="mt-5 font-bold text-ink">Vertragsunterlagen werden geladen …</p></div>
+
+    <section id="contractContent" class="hidden grid gap-7 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,.85fr)]">
+      <article class="rounded-[30px] bg-white p-7 shadow-soft sm:p-9">
+        <p class="text-xs font-bold uppercase tracking-[.16em] text-action">Vertrag zur Unterschrift</p>
+        <h1 id="contractTitle" class="mt-3 text-3xl font-bold tracking-tight text-ink">Colocation-Vertrag</h1>
+        <p class="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500">Bitte prüfen Sie die Vertragsfassung sorgfältig. Laden Sie das Dokument herunter, unterschreiben Sie es und geben Sie ausschließlich die vollständige PDF-Datei über diese Seite zurück.</p>
+        <dl class="mt-7 grid gap-3 sm:grid-cols-2">
+          <div class="rounded-2xl bg-mist p-4"><dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Vertragsnummer</dt><dd id="contractNumber" class="mt-2 text-sm font-bold text-ink">–</dd></div>
+          <div class="rounded-2xl bg-mist p-4"><dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Vertragspartner</dt><dd id="contractCompany" class="mt-2 text-sm font-bold text-ink">–</dd></div>
+          <div class="rounded-2xl bg-mist p-4"><dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Geplanter Start</dt><dd id="contractStart" class="mt-2 text-sm font-bold text-ink">–</dd></div>
+          <div class="rounded-2xl bg-mist p-4"><dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Link gültig bis</dt><dd id="contractExpiry" class="mt-2 text-sm font-bold text-ink">–</dd></div>
+        </dl>
+        <a id="downloadContract" href="#" class="mt-7 inline-flex items-center gap-2 rounded-full bg-action px-5 py-3 text-sm font-bold text-white hover:bg-blue-500"><i data-lucide="download" class="h-4 w-4"></i> Vertrag als PDF herunterladen</a>
+        <div class="mt-7 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-relaxed text-amber-900"><i data-lucide="info" class="mt-0.5 h-4 w-4 shrink-0"></i><p>Diese Seite ersetzt keine qualifizierte elektronische Signatur. Es wird die von Ihnen hochgeladene unterzeichnete PDF-Fassung als Vertragsdokument gespeichert.</p></div>
+      </article>
+
+      <aside class="h-fit rounded-[30px] bg-ink p-7 text-white shadow-soft sm:p-8">
+        <div id="uploadArea">
+          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-white/10 text-blue-200"><i data-lucide="upload-cloud" class="h-6 w-6"></i></span>
+          <h2 class="mt-5 text-xl font-bold">Unterschrieben zurückgeben</h2>
+          <p class="mt-2 text-xs leading-relaxed text-blue-100">Eine PDF-Datei, maximal 10 MB. Andere Dateitypen werden nicht angenommen.</p>
+          <form id="signatureForm" class="mt-6">
+            <label class="flex cursor-pointer flex-col items-center rounded-2xl border border-dashed border-white/25 bg-white/[.06] px-5 py-8 text-center hover:border-blue-300"><i data-lucide="file-up" class="h-6 w-6 text-blue-200"></i><strong id="fileLabel" class="mt-3 text-sm">Unterschriebene PDF auswählen</strong><span class="mt-1 text-[10px] text-blue-200">PDF · max. 10 MB</span><input id="signedContract" name="signedContract" type="file" accept="application/pdf,.pdf" required class="sr-only"></label>
+            <button id="uploadButton" class="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-ink hover:bg-blue-50"><i data-lucide="send" class="h-4 w-4"></i> Vertrag sicher einreichen</button>
+          </form>
+        </div>
+        <div id="successArea" class="hidden py-3 text-center"><span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500 text-white"><i data-lucide="check" class="h-8 w-8"></i></span><h2 class="mt-5 text-xl font-bold">Vertrag eingegangen</h2><p class="mt-2 text-sm leading-relaxed text-blue-100">Vielen Dank. Der Vertrieb wurde informiert und übergibt den Vorgang nun an das technische Onboarding.</p></div>
+      </aside>
+    </section>
+
+    <section id="errorState" class="hidden rounded-[30px] bg-white p-10 text-center shadow-soft"><span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600"><i data-lucide="link-2-off" class="h-7 w-7"></i></span><h1 class="mt-5 text-2xl font-bold text-ink">Vertragslink nicht verfügbar</h1><p id="errorMessage" class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-500">Der Link ist ungültig oder abgelaufen.</p></section>
+  </main>
+
+  <script>
+    lucide.createIcons();
+    const token=new URLSearchParams(location.search).get('token')||'';
+    const apiPath=`/api/v1/public/contracts/${encodeURIComponent(token)}`;
+    const formatDate=value=>value?new Intl.DateTimeFormat('de-DE',{dateStyle:'long'}).format(new Date(value)):'Noch offen';
+    const fail=message=>{document.getElementById('loadingState').classList.add('hidden');document.getElementById('contractContent').classList.add('hidden');document.getElementById('errorState').classList.remove('hidden');document.getElementById('errorMessage').textContent=message;lucide.createIcons();};
+    async function loadContract(){
+      if(!/^[a-f0-9]{64}$/.test(token)){fail('Dieser persönliche Vertragslink ist unvollständig.');return;}
+      try{const response=await fetch(apiPath,{headers:{Accept:'application/json'}});const payload=await response.json();if(!response.ok)throw new Error(payload?.error?.message||'Der Vertragslink ist nicht mehr verfügbar.');const contract=payload.data;document.getElementById('contractTitle').textContent=contract.title;document.getElementById('contractNumber').textContent=contract.contractNumber;document.getElementById('contractCompany').textContent=contract.company||contract.recipientName||'–';document.getElementById('contractStart').textContent=formatDate(contract.plannedStartDate);document.getElementById('contractExpiry').textContent=formatDate(contract.expiresAt);document.getElementById('downloadContract').href=contract.document.downloadUrl;document.getElementById('loadingState').classList.add('hidden');document.getElementById('contractContent').classList.remove('hidden');if(contract.status==='signed_received'){document.getElementById('uploadArea').classList.add('hidden');document.getElementById('successArea').classList.remove('hidden');}lucide.createIcons();}catch(error){fail(error.message);}
+    }
+    document.getElementById('signedContract').addEventListener('change',event=>{const file=event.target.files[0];document.getElementById('fileLabel').textContent=file?`${file.name} · ${(file.size/1024/1024).toFixed(2)} MB`:'Unterschriebene PDF auswählen';});
+    document.getElementById('signatureForm').addEventListener('submit',async event=>{event.preventDefault();const file=document.getElementById('signedContract').files[0];if(!file||file.type!=='application/pdf'||file.size>10*1024*1024){alert('Bitte wählen Sie eine PDF-Datei mit maximal 10 MB.');return;}const button=document.getElementById('uploadButton');button.disabled=true;button.classList.add('opacity-60');try{const data=new FormData();data.append('signedContract',file);const response=await fetch(`${apiPath}/signed-document`,{method:'POST',body:data});const payload=await response.json();if(!response.ok)throw new Error(payload?.error?.message||'Der Upload ist fehlgeschlagen.');document.getElementById('uploadArea').classList.add('hidden');document.getElementById('successArea').classList.remove('hidden');lucide.createIcons();}catch(error){alert(error.message);button.disabled=false;button.classList.remove('opacity-60');}});
+    loadContract();
+  </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 4315 >>
+stream
+q 1.000 1.000 1.000 rg 0.00 0.00 595.28 841.89 re f Q
+q 0.000 0.184 0.518 rg 0.00 722.00 595.28 120.00 re f Q
+q 0.000 0.380 1.000 rg 48.00 768.00 38.00 38.00 re f Q
+BT /F2 12.92 Tf 1.000 1.000 1.000 rg 1 0 0 1 56.00 780.92 Tm (CD) Tj ET
+BT /F2 17.00 Tf 1.000 1.000 1.000 rg 1 0 0 1 101.00 790.00 Tm (CHRIS DATACENTER) Tj ET
+BT /F1 7.50 Tf 0.678 0.800 1.000 rg 1 0 0 1 101.00 775.00 Tm (DATACENTER SERVICES) Tj ET
+BT /F2 22.00 Tf 1.000 1.000 1.000 rg 1 0 0 1 463.84 788.00 Tm (ANGEBOT) Tj ET
+BT /F1 8.50 Tf 0.678 0.800 1.000 rg 1 0 0 1 445.00 770.00 Tm (LEAD-2026-0042 / Runde 1) Tj ET
+BT /F2 9.00 Tf 0.000 0.380 1.000 rg 1 0 0 1 48.00 690.00 Tm (ANGEBOT FÜR) Tj ET
+BT /F2 13.00 Tf 0.000 0.184 0.518 rg 1 0 0 1 48.00 672.00 Tm (Beispiel Industrie GmbH) Tj ET
+BT /F1 9.00 Tf 0.200 0.255 0.333 rg 1 0 0 1 48.00 658.00 Tm (Anna Beispiel) Tj ET
+BT /F1 9.00 Tf 0.200 0.255 0.333 rg 1 0 0 1 48.00 644.00 Tm (Datacenter-Allee 12) Tj ET
+BT /F1 9.00 Tf 0.200 0.255 0.333 rg 1 0 0 1 48.00 630.00 Tm (73033 Göppingen) Tj ET
+BT /F1 9.00 Tf 0.200 0.255 0.333 rg 1 0 0 1 48.00 616.00 Tm (Deutschland) Tj ET
+BT /F1 9.00 Tf 0.200 0.255 0.333 rg 1 0 0 1 48.00 602.00 Tm (anna.beispiel@example.de) Tj ET
+BT /F1 8.00 Tf 0.392 0.455 0.545 rg 1 0 0 1 360.00 672.00 Tm (Angebotsrunde) Tj ET
+BT /F2 8.50 Tf 0.000 0.184 0.518 rg 1 0 0 1 442.00 672.00 Tm (1) Tj ET
+BT /F1 8.00 Tf 0.392 0.455 0.545 rg 1 0 0 1 360.00 655.00 Tm (Gültig bis) Tj ET
+BT /F2 8.50 Tf 0.000 0.184 0.518 rg 1 0 0 1 442.00 655.00 Tm (15.09.2026) Tj ET
+BT /F1 8.00 Tf 0.392 0.455 0.545 rg 1 0 0 1 360.00 638.00 Tm (Laufzeit) Tj ET
+BT /F2 8.50 Tf 0.000 0.184 0.518 rg 1 0 0 1 442.00 638.00 Tm (36 Monate) Tj ET
+BT /F1 8.00 Tf 0.392 0.455 0.545 rg 1 0 0 1 360.00 621.00 Tm (Geplanter Start) Tj ET
+BT /F2 8.50 Tf 0.000 0.184 0.518 rg 1 0 0 1 442.00 621.00 Tm (01.10.2026) Tj ET
+q 0.863 0.894 0.941 RG 0.7 w 48.00 574.00 m 547.00 574.00 l S Q
+BT /F2 15.00 Tf 0.000 0.184 0.518 rg 1 0 0 1 48.00 546.00 Tm (Leistungsübersicht) Tj ET
+q 0.000 0.184 0.518 rg 48.00 498.00 499.00 28.00 re f Q
+BT /F2 7.50 Tf 1.000 1.000 1.000 rg 1 0 0 1 58.00 508.00 Tm (POSITION / BESCHREIBUNG) Tj ET
+BT /F2 7.50 Tf 1.000 1.000 1.000 rg 1 0 0 1 330.00 508.00 Tm (MENGE) Tj ET
+BT /F2 7.50 Tf 1.000 1.000 1.000 rg 1 0 0 1 422.60 508.00 Tm (EINMALIG) Tj ET
+BT /F2 7.50 Tf 1.000 1.000 1.000 rg 1 0 0 1 500.55 508.00 Tm (MONATLICH) Tj ET
+q 0.973 0.980 0.988 rg 48.00 454.00 499.00 44.00 re f Q
+BT /F2 9.50 Tf 0.000 0.184 0.518 rg 1 0 0 1 58.00 480.00 Tm (Colocation Full Rack) Tj ET
+BT /F1 7.80 Tf 0.392 0.455 0.545 rg 1 0 0 1 58.00 466.00 Tm (42 HE, redundante Stromversorgung und) Tj ET
+BT /F1 7.80 Tf 0.392 0.455 0.545 rg 1 0 0 1 58.00 456.00 Tm (Zutrittsmanagement) Tj ET
+BT /F1 8.50 Tf 0.200 0.255 0.333 rg 1 0 0 1 330.00 477.00 Tm (1 Rack) Tj ET
+BT /F1 8.50 Tf 0.200 0.255 0.333 rg 1 0 0 1 412.50 477.00 Tm (490,00 EUR) Tj ET
+BT /F2 8.50 Tf 0.000 0.184 0.518 rg 1 0 0 1 481.92 477.00 Tm (1.290,00 EUR) Tj ET
+BT /F2 9.50 Tf 0.000 0.184 0.518 rg 1 0 0 1 58.00 436.00 Tm (Internet-Flatrate) Tj ET
+BT /F1 7.80 Tf 0.392 0.455 0.545 rg 1 0 0 1 58.00 422.00 Tm (1.000 Mbit/s symmetrisch) Tj ET
+BT /F1 8.50 Tf 0.200 0.255 0.333 rg 1 0 0 1 330.00 433.00 Tm (1 Stk.) Tj ET
+BT /F1 8.50 Tf 0.200 0.255 0.333 rg 1 0 0 1 421.00 433.00 Tm (0,00 EUR) Tj ET
+BT /F2 8.50 Tf 0.000 0.184 0.518 rg 1 0 0 1 491.10 433.00 Tm (390,00 EUR) Tj ET
+q 0.910 0.945 1.000 rg 322.00 295.00 225.00 104.00 re f Q
+BT /F1 9.00 Tf 0.278 0.333 0.412 rg 1 0 0 1 338.00 374.00 Tm (Einmalige Kosten) Tj ET
+BT /F2 10.00 Tf 0.000 0.184 0.518 rg 1 0 0 1 476.00 374.00 Tm (490,00 EUR) Tj ET
+BT /F2 9.00 Tf 0.000 0.184 0.518 rg 1 0 0 1 338.00 347.00 Tm (Monatlicher Gesamtpreis) Tj ET
+BT /F2 14.00 Tf 0.000 0.380 1.000 rg 1 0 0 1 439.28 327.00 Tm (1.680,00 EUR) Tj ET
+BT /F1 7.50 Tf 0.392 0.455 0.545 rg 1 0 0 1 338.00 307.00 Tm (Alle Preise netto zuzüglich gesetzlicher Umsatzsteuer.) Tj ET
+BT /F2 9.00 Tf 0.000 0.184 0.518 rg 1 0 0 1 48.00 265.00 Tm (Hinweise) Tj ET
+BT /F1 8.20 Tf 0.278 0.333 0.412 rg 1 0 0 1 48.00 253.00 Tm (Individuelles Angebot auf Basis Ihrer Anfrage.) Tj ET
+q 0.863 0.894 0.941 RG 0.7 w 48.00 52.00 m 547.00 52.00 l S Q
+BT /F1 7.50 Tf 0.392 0.455 0.545 rg 1 0 0 1 48.00 34.00 Tm (CHRIS DATACENTER · Individuelles Colocation-Angebot) Tj ET
+BT /F1 7.50 Tf 0.392 0.455 0.545 rg 1 0 0 1 520.75 34.00 Tm (Seite 1) Tj ET
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000218 00000 n 
+0000000320 00000 n 
+0000000462 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+4829
+%%EOF

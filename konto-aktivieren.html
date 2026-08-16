@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Persönlichen COLO MANAGER Portalzugang aktivieren.">
+  <title>Portalzugang aktivieren · COLO MANAGER</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{ink:'#001966',action:'#0667F9',mist:'#F3F6FB'},boxShadow:{soft:'0 22px 60px rgba(0,25,102,.10)'}}}}</script>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="/branding.js?v=20260811-3" defer></script>
+</head>
+<body class="min-h-screen bg-mist font-sans text-slate-700 antialiased">
+  <main class="grid min-h-screen lg:grid-cols-[.9fr_1.1fr]">
+    <section class="hidden bg-ink p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
+      <a href="/angebote.html" data-brand-lockup data-brand-logo-height="46" class="flex items-center gap-3"><span class="grid h-11 w-11 place-items-center rounded-2xl bg-action"><i data-lucide="server" class="h-5 w-5"></i></span><strong>COLO MANAGER</strong></a>
+      <div><p class="text-xs font-bold uppercase tracking-[.18em] text-blue-300">Technisches Onboarding</p><h1 class="mt-4 max-w-xl text-4xl font-bold tracking-tight xl:text-5xl">Ihr Datacenter-Portal ist bereit.</h1><p class="mt-5 max-w-lg text-sm leading-relaxed text-blue-100">Legen Sie einmalig Ihr Passwort fest. Anschließend sehen Sie Ihren Tarif, Ihre Vertragsunterlagen und erreichen das Ticketsystem.</p><div class="mt-8 grid gap-3 sm:grid-cols-3"><div class="rounded-2xl bg-white/[.07] p-4"><i data-lucide="file-check-2" class="h-5 w-5 text-blue-300"></i><p class="mt-3 text-xs font-bold">Verträge</p></div><div class="rounded-2xl bg-white/[.07] p-4"><i data-lucide="server-cog" class="h-5 w-5 text-blue-300"></i><p class="mt-3 text-xs font-bold">Leistungen</p></div><div class="rounded-2xl bg-white/[.07] p-4"><i data-lucide="messages-square" class="h-5 w-5 text-blue-300"></i><p class="mt-3 text-xs font-bold">Tickets</p></div></div></div>
+      <p class="text-[10px] text-blue-200/70">Der Einladungslink ist einmalig und 72 Stunden gültig.</p>
+    </section>
+    <section class="flex items-center justify-center p-5 sm:p-10">
+      <div class="w-full max-w-lg rounded-[30px] bg-white p-7 shadow-soft sm:p-10">
+        <div id="loadingState" class="py-12 text-center"><span class="mx-auto grid h-14 w-14 animate-pulse place-items-center rounded-2xl bg-blue-50 text-action"><i data-lucide="user-check" class="h-7 w-7"></i></span><p class="mt-4 font-bold text-ink">Einladung wird geprüft …</p></div>
+        <div id="activationContent" class="hidden">
+          <p class="text-xs font-bold uppercase tracking-[.16em] text-action">Portalzugang aktivieren</p><h2 class="mt-3 text-3xl font-bold tracking-tight text-ink">Willkommen im COLO MANAGER</h2><p class="mt-3 text-sm leading-relaxed text-slate-500"><span id="contactName"></span>, richten Sie jetzt den Zugang für <strong id="companyName" class="text-ink"></strong> ein.</p>
+          <div class="mt-6 rounded-2xl bg-mist p-4"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Anmelde-E-Mail</p><p id="accountEmail" class="mt-2 break-all text-sm font-bold text-ink"></p></div>
+          <form id="activationForm" class="mt-6 space-y-4"><label class="block"><span class="text-xs font-bold text-ink">Passwort</span><input id="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-action focus:ring-4 focus:ring-blue-100" placeholder="Mindestens 12 Zeichen"></label><label class="block"><span class="text-xs font-bold text-ink">Passwort wiederholen</span><input id="passwordConfirmation" type="password" minlength="12" maxlength="128" autocomplete="new-password" required class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-action focus:ring-4 focus:ring-blue-100"></label><p class="text-[11px] leading-relaxed text-slate-400">Erforderlich: 12–128 Zeichen, Groß- und Kleinbuchstaben sowie mindestens eine Zahl.</p><button id="activateButton" class="flex w-full items-center justify-center gap-2 rounded-full bg-action px-5 py-3.5 text-sm font-bold text-white hover:bg-blue-500"><i data-lucide="shield-check" class="h-4 w-4"></i> Zugang verbindlich aktivieren</button></form>
+        </div>
+        <div id="successState" class="hidden py-6 text-center"><span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-500 text-white"><i data-lucide="check" class="h-8 w-8"></i></span><h2 class="mt-5 text-2xl font-bold text-ink">Zugang aktiviert</h2><p class="mt-2 text-sm leading-relaxed text-slate-500">Ihr Vertrag und Tarif wurden dem Kundenkonto zugeordnet. Sie können sich jetzt anmelden.</p><a href="/login.html" class="mt-6 inline-flex items-center gap-2 rounded-full bg-action px-6 py-3 text-sm font-bold text-white"><i data-lucide="log-in" class="h-4 w-4"></i> Zum Kundenlogin</a></div>
+        <div id="errorState" class="hidden py-8 text-center"><span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-red-600"><i data-lucide="link-2-off" class="h-7 w-7"></i></span><h2 class="mt-5 text-2xl font-bold text-ink">Einladung nicht verfügbar</h2><p id="errorMessage" class="mt-3 text-sm leading-relaxed text-slate-500"></p></div>
+      </div>
+    </section>
+  </main>
+  <script>
+    lucide.createIcons();const token=new URLSearchParams(location.search).get('token')||'';const path=`/api/v1/public/account-invitations/${encodeURIComponent(token)}`;const fail=message=>{document.getElementById('loadingState').classList.add('hidden');document.getElementById('activationContent').classList.add('hidden');document.getElementById('errorState').classList.remove('hidden');document.getElementById('errorMessage').textContent=message;};
+    async function load(){if(!/^[a-f0-9]{64}$/.test(token)){fail('Der Einladungslink ist unvollständig.');return;}try{const response=await fetch(path);const payload=await response.json();if(!response.ok)throw new Error(payload?.error?.message||'Der Link ist ungültig oder abgelaufen.');if(payload.data.status==='activated'){document.getElementById('loadingState').classList.add('hidden');document.getElementById('successState').classList.remove('hidden');lucide.createIcons();return;}document.getElementById('accountEmail').textContent=payload.data.email;document.getElementById('companyName').textContent=payload.data.company;document.getElementById('contactName').textContent=payload.data.contactName||'Guten Tag';document.getElementById('loadingState').classList.add('hidden');document.getElementById('activationContent').classList.remove('hidden');}catch(error){fail(error.message);}}
+    document.getElementById('activationForm').addEventListener('submit',async event=>{event.preventDefault();const password=document.getElementById('password').value,passwordConfirmation=document.getElementById('passwordConfirmation').value;if(password!==passwordConfirmation){alert('Die Passwortbestätigung stimmt nicht überein.');return;}const button=document.getElementById('activateButton');button.disabled=true;button.classList.add('opacity-60');try{const response=await fetch(`${path}/activate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password,passwordConfirmation})});const payload=await response.json();if(!response.ok)throw new Error(payload?.error?.message||'Der Zugang konnte nicht aktiviert werden.');document.getElementById('activationContent').classList.add('hidden');document.getElementById('successState').classList.remove('hidden');lucide.createIcons();}catch(error){alert(error.message);button.disabled=false;button.classList.remove('opacity-60');}});load();
+  </script>
+</body>
+</html>
